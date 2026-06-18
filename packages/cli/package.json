@@ -1,6 +1,6 @@
 {
   "name": "@talocode/worklane-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CLI for WorkLane AI coworker platform",
   "main": "dist/index.js",
   "bin": {

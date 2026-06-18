@@ -1,0 +1,12 @@
+node_modules/
+apps/
+packages/
+docs/
+*.tgz
+.worklane/
+coverage/
+.nyc_output/
+*.log
+.DS_Store
+tsconfig*.json
+jest.config.js

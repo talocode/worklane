@@ -1,0 +1,35 @@
+{
+  "name": "@talocode/worklane",
+  "version": "0.1.0",
+  "description": "Open-source AI coworker platform for teams",
+  "main": "packages/cli/dist/index.js",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "clean": "npm run clean --workspaces",
+    "dev": "npm run dev --workspaces"
+  },
+  "keywords": [
+    "ai",
+    "coworker",
+    "telegram",
+    "open-source",
+    "teams",
+    "workflow",
+    "agent"
+  ],
+  "author": "Talocode",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/talocode/worklane"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

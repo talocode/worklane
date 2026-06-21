@@ -1,6 +1,13 @@
 export { storage } from './storage';
 export { canTransition, transitionRun } from './approvals';
-export { executeSimulated } from './executor';
+export { executeSimulated, executeToolRun } from './executor';
+export {
+  TOOL_REGISTRY,
+  getToolAction,
+  listToolActions,
+  createGitHubIssue,
+  executeToolAction,
+} from './tools';
 export type {
   Workspace,
   Agent,
@@ -12,3 +19,11 @@ export type {
   Trigger,
   AuditEvent,
 } from './types';
+export type {
+  ToolProvider,
+  ToolActionType,
+  ToolActionDefinition,
+  GitHubCreateIssueInput,
+  GitHubCreateIssueResult,
+  ToolExecutionResult,
+} from './tools/types';

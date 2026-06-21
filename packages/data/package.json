@@ -1,0 +1,14 @@
+{
+  "name": "@talocode/worklane-data",
+  "version": "0.1.0",
+  "description": "Local data storage for WorkLane command center",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest --passWithNoTests",
+    "clean": "rm -rf dist"
+  },
+  "author": "Talocode",
+  "license": "MIT"
+}

@@ -1,116 +1,96 @@
 # WorkLane
 
-**Open-source AI coworker platform for teams.**
+**Open-source command center for team agents, shared knowledge, tool connections, and recurring work.**
 
-Mention agents in chat. Route work. Return finished output.  
 Self-hostable. Provider-agnostic. Built by Talocode.
 
 ## What is WorkLane?
 
-WorkLane lets teams mention AI agents inside chat tools and get real work done without opening another dashboard or learning prompt engineering.
+WorkLane is a local-first command center where teams can create agents, share knowledge, connect tools, and run recurring work with approval-first automation. Every agent action is logged in an audit trail. All actions are visible. Permissions are always enforced.
 
 ## Features
 
-- **Telegram-first**: Start with Telegram, expand to Slack, Teams, Discord, and more
-- **Provider-agnostic**: Works with OpenAI, OpenRouter, Ollama, and more
-- **Self-hostable**: Run on your own infrastructure
-- **Open-source**: MIT licensed, community-driven
+- **Agent Registry** — Create, share, and run team agents
+- **Knowledge Base** — Store processes, brand context, and institutional knowledge
+- **Connection Registry** — Connect tools once, share access without exposing secrets
+- **Task Runs** — Run agent tasks with approval gates and audit trails
+- **Approval-First** — Destructive actions require explicit human approval
+- **Audit Logging** — Every agent action recorded and reviewable
+- **Simulated Execution** — Clear labeling when tools aren't connected
+- **Local-First Storage** — Data stays on your machine (JSON in v0.1)
+- **Self-Hostable** — Run on your own infrastructure
 
 ## Quick Start
 
 ```bash
-# Install globally
+# Install
 npm install -g @talocode/worklane
 
 # Initialize
 worklane init
 
-# Run a task
+# Run from CLI
 worklane run "summarize this discussion"
-
-# List agents
-worklane agents list
 ```
 
-## Telegram Bot Setup
+## Dashboard
 
-1. Create a bot with @BotFather
-2. Get your bot token
-3. Set environment variable: `export TELEGRAM_BOT_TOKEN=your_token`
-4. Run: `worklane telegram`
-
-## Agents
-
-- **Manager**: Routes tasks to appropriate agents
-- **Research**: Conducts research on topics
-- **Writer**: Creates written content
-- **Engineer**: Plans technical implementation
-- **QA**: Reviews work for quality
-- **Support**: Handles support requests
-- **Marketing**: Creates marketing content
-
-## Workflows
-
-- **Summarize**: Summarize discussions and extract action items
-- **Draft Reply**: Draft replies to messages
-- **Launch Plan**: Create launch plans for products
-- **Research**: Conduct research on topics
-- **Create Issue**: Create GitHub issue drafts
-- **Create Post**: Create social media posts
-- **Video Brief**: Create video briefs for ClipLoop
-
-## Configuration
-
-WorkLane uses a TOML config file at `~/.worklane/config.toml`:
-
-```toml
-model = "gpt-4"
-provider = "openai"
-
-[providers.openai]
-base_url = "https://api.openai.com/v1"
-env_key = "OPENAI_API_KEY"
-
-[providers.openrouter]
-base_url = "https://openrouter.ai/api/v1"
-env_key = "OPENROUTER_API_KEY"
-
-[providers.ollama]
-base_url = "http://localhost:11434/v1"
+```bash
+cd apps/dashboard
+npm install
+npm run dev
 ```
+
+Open `http://localhost:3001` for the command center dashboard.
 
 ## Architecture
 
 ```
-worklane/
-├── apps/
-│   ├── telegram-bot/    # Telegram bot interface
-│   └── api-server/      # HTTP webhook server
-├── packages/
-│   ├── core/            # Core routing and types
-│   ├── agents/          # Agent definitions
-│   ├── memory/          # Local memory storage
-│   ├── providers/       # Provider-agnostic model layer
-│   ├── workflows/       # Workflow definitions
-│   ├── connectors/      # Platform connectors
-│   └── cli/             # CLI interface
-└── docs/                # Documentation
+Dashboard (Next.js)
+    ↓
+API Routes
+    ↓
+WorkLane Data Library
+    ↓
+Local JSON Storage (.worklane/*.json)
 ```
 
-## Security
+## Safety Model
 
-- Never print API keys
-- Never expose .env files
-- No automatic external sends
-- No destructive actions without approval
-- Log what agents do
-- Store runs locally
+- Secrets stored as references only — never raw credentials
+- Destructive actions require explicit approval
+- All actions logged in immutable audit trail
+- Local-first: data stays on your machine
+- No external data transmission without consent
+- Simulated execution clearly labeled when tools aren't connected
+- Honest execution labeling — only real or simulated
+
+## What's Implemented Now (v0.1)
+
+- Agent registry (create, list, run)
+- Knowledge base (add, list, search)
+- Connection registry (add, list — secrets as references)
+- Task runs with approval workflow
+- Audit logging
+- Dashboard UI
+- Local JSON storage
+- Simulated execution
+
+## What's Planned
+
+- Real tool execution (GitHub, Slack, email)
+- MCP server support
+- Schedule and event-based triggers
+- Multi-user workspaces
+- Role-based permissions
+- Agent-generated dashboards and apps
 
 ## Documentation
 
-- [Architecture](docs/ARCHITECTURE.md)
-- [Telegram Setup](docs/TELEGRAM_SETUP.md)
-- [Providers](docs/PROVIDERS.md)
+- [Product](docs/PRODUCT.md)
+- [Architecture](docs/ARCHITECTURE_COMMAND_CENTER.md)
+- [Data Model](docs/DATA_MODEL.md)
+- [API](docs/API_COMMAND_CENTER.md)
 - [Agents](docs/AGENTS.md)
 - [Security](docs/SECURITY.md)
 - [Roadmap](docs/ROADMAP.md)

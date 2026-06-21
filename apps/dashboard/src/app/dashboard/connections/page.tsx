@@ -7,7 +7,7 @@ export default function ConnectionsPage() {
   const [name, setName] = useState('');
   const [type, setType] = useState('custom');
 
-  const load = () => fetch('/api/connections').then(r => r.json()).then(d => setConns(d.connections || []));
+  const load = () => fetch('/api/connections').then(r => r.json()).then(d => setConns(d.connections || d.data?.connections || []));
   useEffect(() => { load(); }, []);
 
   const add = async () => {
@@ -23,7 +23,10 @@ export default function ConnectionsPage() {
 
   return (
     <div style={{ padding: '32px 40px', maxWidth: 800 }}>
-      <h1 style={{ fontSize: 24, fontWeight: 600, marginBottom: 24 }}>Connections</h1>
+      <h1 style={{ fontSize: 24, fontWeight: 600, marginBottom: 8 }}>Connections</h1>
+      <div style={{ padding: '8px 12px', background: '#1a1a2e', border: '1px solid #2a2a3a', borderRadius: 6, marginBottom: 24, fontSize: 13, color: '#fbbf24' }}>
+        v0.1: Connections store references only. Secrets are never stored in plaintext. No real tool execution yet.
+      </div>
       <div style={{ padding: 20, background: '#16161e', border: '1px solid #2a2a3a', borderRadius: 8, marginBottom: 24 }}>
         <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Add Connection</h2>
         <input placeholder="Name" value={name} onChange={e => setName(e.target.value)} style={input} />
@@ -34,16 +37,13 @@ export default function ConnectionsPage() {
           <option value="email">Email</option>
         </select>
         <button onClick={add} style={btn}>Add Connection</button>
-        <div style={{ marginTop: 8, fontSize: 12, color: '#888' }}>
-          Secrets are stored as references, never in plaintext.
-        </div>
       </div>
       <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Connections ({conns.length})</h2>
       {conns.map(c => (
         <div key={c.id} style={listItem}>
           <div style={{ fontSize: 15, fontWeight: 500 }}>{c.name}</div>
           <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
-            Type: {c.type} · Status: {c.status} · Secret: ***
+            Type: {c.type} · Status: {c.status} · Secret: *** (reference only)
           </div>
         </div>
       ))}

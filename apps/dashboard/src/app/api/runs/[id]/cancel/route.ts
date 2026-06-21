@@ -1,23 +1,25 @@
 import { NextResponse } from 'next/server';
 import { storage } from '../../../../../../../../packages/data/src/storage';
+import { transitionRun } from '../../../../../../../../packages/data/src/approvals';
+import { ok, badRequest, notFound } from '../../../../../../lib/api/response';
+import { checkAuth } from '../../../../../../lib/api/auth';
 
 export async function POST(_request: Request, { params }: { params: { id: string } }) {
+  const authError = checkAuth(_request);
+  if (authError) return authError;
+
   const run = storage.runs.get(params.id);
   if (!run) {
-    return NextResponse.json({ ok: false, error: 'Run not found' }, { status: 404 });
+    return notFound('Run not found');
   }
 
-  storage.runs.update(params.id, { status: 'cancelled' });
+  const result = transitionRun(run, 'cancelled', 'user');
+  if ('error' in result) {
+    return badRequest(result.error);
+  }
 
-  storage.audit.create({
-    workspaceId: 'ws_default',
-    actorId: 'user',
-    actorType: 'user',
-    action: 'run.cancelled',
-    target: params.id,
-    targetType: 'run',
-    result: 'success',
-  });
+  storage.runs.update(params.id, result.updatedRun);
+  storage.audit.create(result.auditEvent);
 
-  return NextResponse.json({ ok: true, run: storage.runs.get(params.id) });
+  return ok({ run: storage.runs.get(params.id) });
 }

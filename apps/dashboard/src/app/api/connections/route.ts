@@ -1,21 +1,28 @@
 import { NextResponse } from 'next/server';
 import { storage } from '../../../../../../packages/data/src/storage';
+import { ok, badRequest } from '../../../lib/api/response';
+import { checkAuth } from '../../../lib/api/auth';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const authError = checkAuth(request);
+  if (authError) return authError;
   const conns = storage.connections.list().map(c => ({
     ...c,
     secretRef: '***',
   }));
-  return NextResponse.json({ ok: true, connections: conns });
+  return ok({ connections: conns });
 }
 
 export async function POST(request: Request) {
+  const authError = checkAuth(request);
+  if (authError) return authError;
+
   const body = await request.json();
   if (!body.name || typeof body.name !== 'string') {
-    return NextResponse.json({ ok: false, error: 'name is required' }, { status: 400 });
+    return badRequest('name is required');
   }
   if (!body.type || typeof body.type !== 'string') {
-    return NextResponse.json({ ok: false, error: 'type is required' }, { status: 400 });
+    return badRequest('type is required');
   }
   const conn = storage.connections.create({
     workspaceId: 'ws_default',
@@ -34,5 +41,5 @@ export async function POST(request: Request) {
     targetType: 'connection',
     result: 'success',
   });
-  return NextResponse.json({ ok: true, connection: { ...conn, secretRef: '***' } });
+  return ok({ connection: { ...conn, secretRef: '***' } });
 }

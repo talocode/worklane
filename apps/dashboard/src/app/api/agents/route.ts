@@ -1,15 +1,22 @@
 import { NextResponse } from 'next/server';
 import { storage } from '../../../../../../packages/data/src/storage';
+import { ok, badRequest } from '../../../lib/api/response';
+import { checkAuth } from '../../../lib/api/auth';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const authError = checkAuth(request);
+  if (authError) return authError;
   const agents = storage.agents.list();
-  return NextResponse.json({ ok: true, agents });
+  return ok({ agents });
 }
 
 export async function POST(request: Request) {
+  const authError = checkAuth(request);
+  if (authError) return authError;
+
   const body = await request.json();
   if (!body.name || typeof body.name !== 'string') {
-    return NextResponse.json({ ok: false, error: 'name is required' }, { status: 400 });
+    return badRequest('name is required');
   }
   const agent = storage.agents.create({
     workspaceId: 'ws_default',
@@ -29,5 +36,5 @@ export async function POST(request: Request) {
     targetType: 'agent',
     result: 'success',
   });
-  return NextResponse.json({ ok: true, agent });
+  return ok({ agent });
 }

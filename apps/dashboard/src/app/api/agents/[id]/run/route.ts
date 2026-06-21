@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { storage } from '../../../../../../packages/data/src/storage';
+import { ok, badRequest, notFound } from '../../../lib/api/response';
+import { checkAuth } from '../../../lib/api/auth';
 
 function generateStepId(): string {
   return `step_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
@@ -8,9 +10,7 @@ function generateStepId(): string {
 function planSteps(task: string): { order: number; description: string; tool?: string }[] {
   const words = task.toLowerCase();
   const steps: { order: number; description: string; tool?: string }[] = [];
-
   steps.push({ order: 1, description: 'Analyze task requirements' });
-
   if (words.includes('research') || words.includes('find') || words.includes('look up')) {
     steps.push({ order: 2, description: 'Search for relevant information', tool: 'web_search' });
   }
@@ -20,7 +20,6 @@ function planSteps(task: string): { order: number; description: string; tool?: s
   if (words.includes('send') || words.includes('email') || words.includes('post')) {
     steps.push({ order: steps.length + 1, description: 'Deliver output', tool: 'messenger' });
   }
-
   steps.push({ order: steps.length + 1, description: 'Compile results' });
   return steps;
 }
@@ -33,14 +32,17 @@ function assessRisk(task: string): 'low' | 'medium' | 'high' {
 }
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
+  const authError = checkAuth(request);
+  if (authError) return authError;
+
   const body = await request.json();
   if (!body.task || typeof body.task !== 'string') {
-    return NextResponse.json({ ok: false, error: 'task is required' }, { status: 400 });
+    return badRequest('task is required');
   }
 
   const agent = storage.agents.get(params.id);
   if (!agent) {
-    return NextResponse.json({ ok: false, error: 'Agent not found' }, { status: 404 });
+    return notFound('Agent not found');
   }
 
   const riskLevel = assessRisk(body.task);
@@ -53,7 +55,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     status: 'pending_approval',
     executionMode: 'simulated',
     riskLevel,
-    plan: steps.map((s, i) => ({
+    plan: steps.map((s) => ({
       id: generateStepId(),
       runId: '',
       order: s.order,
@@ -85,5 +87,5 @@ export async function POST(request: Request, { params }: { params: { id: string 
     metadata: { task: body.task, riskLevel },
   });
 
-  return NextResponse.json({ ok: true, run });
+  return ok({ run });
 }

@@ -106,6 +106,30 @@ export const TOOL_REGISTRY: ToolActionDefinition[] = [
       },
     },
   },
+  {
+    id: 'github.search_issues',
+    provider: 'github',
+    type: 'github.search_issues',
+    name: 'Search GitHub Issues',
+    description: 'Search issues across GitHub repositories',
+    riskLevel: 'low',
+    requiresApproval: false,
+    requiredConnectionType: 'github',
+    readOnly: true,
+    inputSchema: {
+      type: 'object',
+      required: ['query'],
+      properties: {
+        query: { type: 'string', description: 'Search query text' },
+        owner: { type: 'string', description: 'Filter by owner or organization' },
+        repo: { type: 'string', description: 'Filter by repository (requires owner)' },
+        state: { type: 'string', enum: ['open', 'closed', 'all'], description: 'Issue state filter' },
+        labels: { type: 'array', items: { type: 'string' }, description: 'Label filter' },
+        limit: { type: 'number', description: 'Max results to return (1-50, default 20)' },
+        includePullRequests: { type: 'boolean', description: 'Include pull requests (default: false)' },
+      },
+    },
+  },
 ];
 
 export function getToolAction(actionType: string): ToolActionDefinition | undefined {

@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 
-type GitHubAction = 'github.create_issue' | 'github.create_comment' | 'github.list_issues' | 'github.get_issue' | 'github.list_issue_comments';
+type GitHubAction = 'github.create_issue' | 'github.create_comment' | 'github.list_issues' | 'github.get_issue' | 'github.list_issue_comments' | 'github.search_issues';
 
-const READ_ONLY_ACTIONS: GitHubAction[] = ['github.list_issues', 'github.get_issue', 'github.list_issue_comments'];
+const READ_ONLY_ACTIONS: GitHubAction[] = ['github.list_issues', 'github.get_issue', 'github.list_issue_comments', 'github.search_issues'];
 
 export default function RunsPage() {
   const [runs, setRuns] = useState<any[]>([]);
@@ -21,6 +21,8 @@ export default function RunsPage() {
   const [listState, setListState] = useState('open');
   const [listLabels, setListLabels] = useState('');
   const [listLimit, setListLimit] = useState('20');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchIncludePrs, setSearchIncludePrs] = useState(false);
   const [message, setMessage] = useState('');
 
   const isReadOnly = READ_ONLY_ACTIONS.includes(action);
@@ -59,6 +61,10 @@ export default function RunsPage() {
       if (!issueNumber) { setMessage('Issue number is required'); return; }
       toolInput = { owner, repo, issueNumber: parseInt(issueNumber, 10), limit: parseInt(listLimit, 10) || 20 };
       taskDescription = `List comments on GitHub issue #${issueNumber}`;
+    } else if (action === 'github.search_issues') {
+      if (!searchQuery) { setMessage('Search query is required'); return; }
+      toolInput = { query: searchQuery, owner: owner || undefined, repo: repo || undefined, state: listState, labels: listLabels ? listLabels.split(',').map(l => l.trim()).filter(Boolean) : undefined, limit: parseInt(listLimit, 10) || 20, includePullRequests: searchIncludePrs };
+      taskDescription = `Search GitHub issues: ${searchQuery}`;
     }
 
     const res = await fetch(`/api/agents/${selectedAgent}/run`, {
@@ -116,9 +122,9 @@ export default function RunsPage() {
         </select>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-          {(['github.create_issue', 'github.create_comment', 'github.list_issues', 'github.get_issue', 'github.list_issue_comments'] as GitHubAction[]).map(a => (
+          {(['github.create_issue', 'github.create_comment', 'github.list_issues', 'github.get_issue', 'github.list_issue_comments', 'github.search_issues'] as GitHubAction[]).map(a => (
             <button key={a} onClick={() => setAction(a)} style={{ ...btn, background: action === a ? '#3b82f6' : '#2a2a3a', fontSize: 11, padding: '6px 8px' }}>
-              {a === 'github.create_issue' ? 'Create Issue' : a === 'github.create_comment' ? 'Comment' : a === 'github.list_issues' ? 'List Issues' : a === 'github.get_issue' ? 'Get Issue' : 'List Comments'}
+              {a === 'github.create_issue' ? 'Create Issue' : a === 'github.create_comment' ? 'Comment' : a === 'github.list_issues' ? 'List Issues' : a === 'github.get_issue' ? 'Get Issue' : a === 'github.list_issue_comments' ? 'List Comments' : 'Search Issues'}
             </button>
           ))}
         </div>
@@ -172,6 +178,29 @@ export default function RunsPage() {
           </>
         )}
 
+        {action === 'github.search_issues' && (
+          <>
+            <input placeholder="Search query (e.g. auth bug, dashboard error)" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={input} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+              <input placeholder="Owner/org (optional)" value={owner} onChange={e => setOwner(e.target.value)} style={input} />
+              <input placeholder="Repo (optional, needs owner)" value={repo} onChange={e => setRepo(e.target.value)} style={input} />
+              <select value={listState} onChange={e => setListState(e.target.value)} style={input}>
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+                <option value="all">All</option>
+              </select>
+            </div>
+            <input placeholder="Labels (comma-sep, optional)" value={listLabels} onChange={e => setListLabels(e.target.value)} style={input} />
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 8 }}>
+              <input placeholder="Limit (1-50)" type="number" value={listLimit} onChange={e => setListLimit(e.target.value)} style={{ ...input, width: 120, marginBottom: 0 }} />
+              <label style={{ fontSize: 12, color: '#888', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <input type="checkbox" checked={searchIncludePrs} onChange={e => setSearchIncludePrs(e.target.checked)} /> Include pull requests
+              </label>
+            </div>
+            <div style={{ fontSize: 11, color: '#4ade80', marginTop: 4 }}>Searches across repos. Pull requests excluded by default.</div>
+          </>
+        )}
+
         <button onClick={createRun} style={btn}>Create Run</button>
         <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>
           {isReadOnly ? 'Read-only actions execute immediately without approval.' : 'Write actions require approval before any GitHub action is performed.'}
@@ -204,6 +233,7 @@ export default function RunsPage() {
               {r.toolAction === 'github.list_issues' && ` — state: ${r.toolInput.state || 'open'}, limit: ${r.toolInput.limit || 20}`}
               {r.toolAction === 'github.get_issue' && r.toolInput.issueNumber && ` — #${r.toolInput.issueNumber}`}
               {r.toolAction === 'github.list_issue_comments' && r.toolInput.issueNumber && ` — #${r.toolInput.issueNumber} (limit: ${r.toolInput.limit || 20})`}
+              {r.toolAction === 'github.search_issues' && r.toolInput.query && ` — "${String(r.toolInput.query).slice(0, 40)}${String(r.toolInput.query).length > 40 ? '...' : ''}"`}
             </div>
           )}
           <div style={{ marginTop: 8, display: 'flex', gap: 6 }}>

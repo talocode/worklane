@@ -11,6 +11,7 @@ export {
   listGitHubIssues,
   getGitHubIssue,
   listGitHubIssueComments,
+  searchGitHubIssues,
   executeToolAction,
 } from './tools';
 export type {
@@ -40,5 +41,8 @@ export type {
   GitHubListIssueCommentsInput,
   GitHubListIssueCommentsResult,
   GitHubIssueCommentSummary,
+  GitHubSearchIssuesInput,
+  GitHubSearchIssuesResult,
+  GitHubSearchIssueSummary,
   ToolExecutionResult,
 } from './tools/types';

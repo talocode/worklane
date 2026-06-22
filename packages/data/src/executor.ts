@@ -14,6 +14,10 @@ function safeAuditSummary(toolAction: string, result: Record<string, unknown>): 
     const count = (result as any).count ?? (result.comments as any[])?.length ?? 0;
     return `Listed ${count} comments on issue #${(result as any).issueNumber}`;
   }
+  if (toolAction === 'github.search_issues') {
+    const count = (result as any).count ?? 0;
+    return `Found ${count} issues`;
+  }
   return `Executed ${toolAction}`;
 }
 
@@ -46,6 +50,16 @@ function safeInputPreview(toolAction: string, toolInput: Record<string, unknown>
   if (toolAction === 'github.list_issue_comments') {
     preview.issueNumber = toolInput.issueNumber;
     preview.limit = toolInput.limit || 20;
+  }
+
+  if (toolAction === 'github.search_issues') {
+    if (typeof toolInput.query === 'string') {
+      preview.queryPreview = toolInput.query.length > 120 ? toolInput.query.slice(0, 120) + '...' : toolInput.query;
+    }
+    preview.state = toolInput.state || 'open';
+    preview.limit = toolInput.limit || 20;
+    if (toolInput.owner) preview.owner = toolInput.owner;
+    if (toolInput.repo) preview.repo = toolInput.repo;
   }
 
   return preview;

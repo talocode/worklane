@@ -5,7 +5,8 @@ export type ToolActionType =
   | 'github.create_comment'
   | 'github.list_issues'
   | 'github.get_issue'
-  | 'github.list_issue_comments';
+  | 'github.list_issue_comments'
+  | 'github.search_issues';
 
 export interface ToolActionDefinition {
   id: string;
@@ -123,6 +124,40 @@ export interface GitHubListIssueCommentsResult {
   issueNumber: number;
   count: number;
   comments: GitHubIssueCommentSummary[];
+}
+
+export interface GitHubSearchIssuesInput {
+  query: string;
+  owner?: string;
+  repo?: string;
+  state?: 'open' | 'closed' | 'all';
+  labels?: string[];
+  limit?: number;
+  includePullRequests?: boolean;
+}
+
+export interface GitHubSearchIssueSummary {
+  number: number;
+  title: string;
+  state: 'open' | 'closed';
+  url: string;
+  repositoryFullName: string;
+  labels: string[];
+  createdAt: string;
+  updatedAt: string;
+  authorLogin: string;
+  commentCount: number;
+  isPullRequest: boolean;
+  bodyPreview?: string;
+  bodyLength?: number;
+}
+
+export interface GitHubSearchIssuesResult {
+  query: string;
+  count: number;
+  totalCount?: number;
+  incompleteResults?: boolean;
+  issues: GitHubSearchIssueSummary[];
 }
 
 export interface ToolExecutionResult {

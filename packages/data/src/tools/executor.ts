@@ -1,5 +1,5 @@
-import type { ToolActionType, GitHubCreateIssueInput, GitHubCreateCommentInput, GitHubListIssuesInput, GitHubGetIssueInput, GitHubListIssueCommentsInput, ToolExecutionResult } from './types';
-import { createGitHubIssue, createGitHubComment, listGitHubIssues, getGitHubIssue, listGitHubIssueComments } from './github';
+import type { ToolActionType, GitHubCreateIssueInput, GitHubCreateCommentInput, GitHubListIssuesInput, GitHubGetIssueInput, GitHubListIssueCommentsInput, GitHubSearchIssuesInput, ToolExecutionResult } from './types';
+import { createGitHubIssue, createGitHubComment, listGitHubIssues, getGitHubIssue, listGitHubIssueComments, searchGitHubIssues } from './github';
 
 export async function executeToolAction(
   actionType: ToolActionType,
@@ -44,6 +44,14 @@ export async function executeToolAction(
       return {
         ok: true,
         execution: { mode: 'read', provider: 'github', action: 'github.list_issue_comments', result: result.result as unknown as Record<string, unknown> },
+      };
+    }
+    case 'github.search_issues': {
+      const result = await searchGitHubIssues(input as unknown as GitHubSearchIssuesInput);
+      if (!result.ok) return { ok: false, error: result.error, errorCode: result.errorCode };
+      return {
+        ok: true,
+        execution: { mode: 'read', provider: 'github', action: 'github.search_issues', result: result.result as unknown as Record<string, unknown> },
       };
     }
     default:

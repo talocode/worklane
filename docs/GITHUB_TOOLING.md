@@ -18,6 +18,7 @@ WorkLane's GitHub tool integration: creating issues, commenting, and inspecting 
 | `github.list_issues` | low | no | List issues in a GitHub repository |
 | `github.get_issue` | low | no | Get details of a specific GitHub issue |
 | `github.list_issue_comments` | low | no | List comments on a GitHub issue |
+| `github.search_issues` | low | no | Search issues across GitHub repositories |
 
 ## How It Works
 
@@ -151,6 +152,55 @@ curl -X POST http://localhost:3001/api/runs/{runId}/execute
 ### List Issue Comments Output
 
 Returns: owner, repo, issueNumber, count, comments[] (each with id, url, authorLogin, bodyPreview (max 500 chars), bodyLength, createdAt, updatedAt).
+
+## Search Issues
+
+Search across GitHub repositories using GitHub's search API.
+
+```bash
+curl -X POST http://localhost:3001/api/agents/{agentId}/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task": "Search for auth bugs in worklane",
+    "toolAction": "github.search_issues",
+    "toolInput": {
+      "query": "authentication bug",
+      "owner": "talocode",
+      "state": "open",
+      "labels": ["bug"],
+      "limit": 10
+    },
+    "executionMode": "live"
+  }'
+
+curl -X POST http://localhost:3001/api/runs/{runId}/execute
+```
+
+### Search Issues Input
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `query` | string | yes | — | Search query text (max 256 chars) |
+| `owner` | string | no | — | Filter by owner or organization |
+| `repo` | string | no | — | Filter by repository (requires owner) |
+| `state` | string | no | `open` | `open`, `closed`, or `all` |
+| `labels` | string[] | no | — | Filter by labels |
+| `limit` | number | no | `20` | Max results (1-50) |
+| `includePullRequests` | boolean | no | `false` | Include pull requests |
+
+### Search Issues Output
+
+Returns: query, count, totalCount, incompleteResults, issues[] (each with number, title, state, url, repositoryFullName, labels, createdAt, updatedAt, authorLogin, commentCount, isPullRequest, bodyPreview (max 300 chars), bodyLength).
+
+### Search Query Behavior
+
+WorkLane constructs GitHub search queries with these qualifiers:
+
+- `is:issue` added by default (excludes pull requests)
+- `state:open` or `state:closed` unless state is `all`
+- `repo:owner/repo` when both owner and repo provided
+- `org:owner` when only owner is provided
+- `label:"name"` for each label filter
 
 ## Create Issue
 

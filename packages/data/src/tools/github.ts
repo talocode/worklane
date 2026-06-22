@@ -11,6 +11,9 @@ import type {
   GitHubListIssueCommentsInput,
   GitHubListIssueCommentsResult,
   GitHubIssueCommentSummary,
+  GitHubSearchIssuesInput,
+  GitHubSearchIssuesResult,
+  GitHubSearchIssueSummary,
   GitHubToolError,
   GitHubErrorCode,
 } from './types';
@@ -436,6 +439,126 @@ export async function listGitHubIssueComments(
       issueNumber: input.issueNumber,
       count: comments.length,
       comments,
+    },
+  };
+}
+
+function validateSearchIssuesInput(input: Record<string, unknown>): string | null {
+  if (!input.query || typeof input.query !== 'string') return 'query is required and must be a string';
+  if (input.query.length > 256) return 'query must be 256 characters or fewer';
+  if (input.owner && typeof input.owner !== 'string') return 'owner must be a string';
+  if (input.repo && typeof input.repo !== 'string') return 'repo must be a string';
+  if (input.repo && !input.owner) return 'owner is required when repo is provided';
+  if (input.state && !['open', 'closed', 'all'].includes(input.state as string)) {
+    return 'state must be "open", "closed", or "all"';
+  }
+  if (input.labels && !Array.isArray(input.labels)) return 'labels must be an array of strings';
+  if (input.limit !== undefined && input.limit !== null) {
+    if (typeof input.limit !== 'number' || !Number.isInteger(input.limit) || input.limit < 1) {
+      return 'limit must be a positive integer';
+    }
+    if (input.limit > 50) return 'limit must be 50 or fewer';
+  }
+  return null;
+}
+
+function buildSearchQuery(input: GitHubSearchIssuesInput): string {
+  const parts: string[] = [];
+
+  parts.push(input.query.trim());
+
+  if (!input.includePullRequests) {
+    parts.push('is:issue');
+  }
+
+  if (input.repo && input.owner) {
+    parts.push(`repo:${input.owner}/${input.repo}`);
+  } else if (input.owner) {
+    parts.push(`org:${input.owner}`);
+  }
+
+  const state = input.state || 'open';
+  if (state !== 'all') {
+    parts.push(`state:${state}`);
+  }
+
+  if (input.labels && input.labels.length > 0) {
+    for (const label of input.labels) {
+      parts.push(`label:"${label}"`);
+    }
+  }
+
+  return parts.join(' ');
+}
+
+function normalizeSearchIssue(raw: any): GitHubSearchIssueSummary {
+  const body = raw.body || '';
+  const repoUrl = raw.repository_url || '';
+  const repoFullName = repoUrl.replace('https://api.github.com/repos/', '') || 'unknown/unknown';
+
+  return {
+    number: raw.number,
+    title: raw.title,
+    state: raw.state,
+    url: raw.html_url,
+    repositoryFullName: repoFullName,
+    labels: Array.isArray(raw.labels) ? raw.labels.map((l: any) => l.name || l) : [],
+    createdAt: raw.created_at || '',
+    updatedAt: raw.updated_at || '',
+    authorLogin: raw.user?.login || 'unknown',
+    commentCount: raw.comments || 0,
+    isPullRequest: !!raw.pull_request,
+    bodyPreview: body.length > 300 ? body.slice(0, 300) + '...' : body || undefined,
+    bodyLength: body.length || undefined,
+  };
+}
+
+export async function searchGitHubIssues(
+  input: GitHubSearchIssuesInput
+): Promise<{ ok: true; result: GitHubSearchIssuesResult } | { ok: false; error: string; errorCode?: GitHubErrorCode }> {
+  const token = getGithubToken();
+  if (!token) {
+    return { ok: false, error: 'WORKLANE_GITHUB_TOKEN environment variable is not set', errorCode: 'missing_token' };
+  }
+
+  const validationError = validateSearchIssuesInput(input);
+  if (validationError) {
+    return { ok: false, error: validationError, errorCode: 'validation_error' };
+  }
+
+  const limit = input.limit || 20;
+  const searchQuery = buildSearchQuery(input);
+  const params = new URLSearchParams({ q: searchQuery, per_page: String(Math.min(limit, 50)) });
+
+  const url = `${GITHUB_API_BASE}/search/issues?${params.toString()}`;
+
+  const result = await githubRequestWithRetry(url, token, { method: 'GET' });
+
+  if ('error' in result) {
+    return { ok: false, error: result.error.message, errorCode: result.error.code };
+  }
+
+  const data = JSON.parse(result.body);
+  if (!data.items || !Array.isArray(data.items)) {
+    return { ok: false, error: 'Unexpected response format from GitHub search API', errorCode: 'unknown' };
+  }
+
+  let issues = data.items.map(normalizeSearchIssue);
+
+  if (!input.includePullRequests) {
+    issues = issues.filter((i) => !i.isPullRequest);
+  }
+
+  issues = issues.slice(0, limit);
+
+  return {
+    ok: true,
+    result: {
+      query: input.query,
+      count: issues.length,
+      totalCount: data.total_count,
+      incompleteResults: data.incomplete_results || false,
+      issues,
     },
   };
 }

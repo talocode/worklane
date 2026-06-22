@@ -26,13 +26,14 @@ assert(fs.existsSync('packages/data/src/tools/github.ts'), 'tools/github.ts exis
 assert(fs.existsSync('packages/data/src/tools/executor.ts'), 'tools/executor.ts exists');
 assert(fs.existsSync('packages/data/src/tools/index.ts'), 'tools/index.ts exists');
 
-// Test 2: Registry has all four actions
+// Test 2: Registry has all five actions
 console.log('\n2. Tool Registry');
 const registryContent = fs.readFileSync('packages/data/src/tools/registry.ts', 'utf-8');
 assert(registryContent.includes('github.create_issue'), 'Registry defines github.create_issue');
 assert(registryContent.includes('github.create_comment'), 'Registry defines github.create_comment');
 assert(registryContent.includes('github.list_issues'), 'Registry defines github.list_issues');
 assert(registryContent.includes('github.get_issue'), 'Registry defines github.get_issue');
+assert(registryContent.includes('github.list_issue_comments'), 'Registry defines github.list_issue_comments');
 
 // Test 3: Read-only actions marked correctly
 console.log('\n3. Read-Only Actions');
@@ -40,6 +41,7 @@ assert(registryContent.includes('readOnly: true'), 'Read-only actions have readO
 assert(registryContent.includes('requiresApproval: false'), 'Read-only actions do not require approval');
 assert(registryContent.includes("'List GitHub Issues'"), 'List issues action registered');
 assert(registryContent.includes("'Get GitHub Issue'"), 'Get issue action registered');
+assert(registryContent.includes("'List Issue Comments'"), 'List issue comments action registered');
 assert(registryContent.includes('isReadOnlyAction'), 'isReadOnlyAction function exported');
 
 // Test 4: GitHub adapter hardening
@@ -50,6 +52,8 @@ assert(githubContent.includes('validateCreateIssueInput'), 'Validates issue inpu
 assert(githubContent.includes('validateCreateCommentInput'), 'Validates comment input');
 assert(githubContent.includes('validateListIssuesInput'), 'Validates list issues input');
 assert(githubContent.includes('validateGetIssueInput'), 'Validates get issue input');
+assert(githubContent.includes('validateListIssueCommentsInput'), 'Validates list issue comments input');
+assert(githubContent.includes('normalizeComment'), 'Normalizes comment objects');
 assert(githubContent.includes('AbortController'), 'Uses AbortController for timeout');
 assert(githubContent.includes('classifyGitHubError'), 'Classifies GitHub errors');
 assert(githubContent.includes('githubRequestWithRetry'), 'Has retry wrapper');
@@ -79,8 +83,10 @@ console.log('\n7. Tools Executor');
 const toolsExecContent = fs.readFileSync('packages/data/src/tools/executor.ts', 'utf-8');
 assert(toolsExecContent.includes('github.list_issues'), 'Handles list_issues');
 assert(toolsExecContent.includes('github.get_issue'), 'Handles get_issue');
+assert(toolsExecContent.includes('github.list_issue_comments'), 'Handles list_issue_comments');
 assert(toolsExecContent.includes('listGitHubIssues'), 'Calls listGitHubIssues');
 assert(toolsExecContent.includes('getGitHubIssue'), 'Calls getGitHubIssue');
+assert(toolsExecContent.includes('listGitHubIssueComments'), 'Calls listGitHubIssueComments');
 assert(toolsExecContent.includes("'read'"), 'Sets mode to read for read-only actions');
 
 // Test 8: Parent executor handles read-only
@@ -91,6 +97,7 @@ assert(executorContent.includes('tool.read'), 'Uses tool.read audit prefix');
 assert(executorContent.includes('Write actions must be approved'), 'Write actions still require approval');
 assert(executorContent.includes('Listed'), 'Audit summary for list issues');
 assert(executorContent.includes('Got issue'), 'Audit summary for get issue');
+assert(executorContent.includes('Listed'), 'Audit summary for list issue comments');
 
 // Test 9: Execute endpoint handles read-only
 console.log('\n9. Execute Endpoint');
@@ -103,6 +110,8 @@ console.log('\n10. Dashboard');
 const runsPage = fs.readFileSync('apps/dashboard/src/app/dashboard/runs/page.tsx', 'utf-8');
 assert(runsPage.includes('github.list_issues'), 'Dashboard has list_issues action');
 assert(runsPage.includes('github.get_issue'), 'Dashboard has get_issue action');
+assert(runsPage.includes('github.list_issue_comments'), 'Dashboard has list_issue_comments action');
+assert(runsPage.includes('List Comments'), 'Dashboard has List Comments label');
 assert(runsPage.includes('READ'), 'Dashboard shows READ badge');
 assert(runsPage.includes('Read-only: no approval required'), 'Dashboard shows read-only label');
 assert(runsPage.includes('no approval required'), 'Dashboard mentions no approval for read-only');
@@ -122,6 +131,9 @@ assert(typesContent.includes('GitHubListIssuesResult'), 'Has list issues result 
 assert(typesContent.includes('GitHubIssueSummary'), 'Has issue summary type');
 assert(typesContent.includes('GitHubGetIssueInput'), 'Has get issue input type');
 assert(typesContent.includes('GitHubGetIssueResult'), 'Has get issue result type');
+assert(typesContent.includes('GitHubListIssueCommentsInput'), 'Has list issue comments input type');
+assert(typesContent.includes('GitHubListIssueCommentsResult'), 'Has list issue comments result type');
+assert(typesContent.includes('GitHubIssueCommentSummary'), 'Has issue comment summary type');
 assert(typesContent.includes('isPullRequest'), 'Issue summary has isPullRequest');
 assert(typesContent.includes('readOnly?: boolean'), 'ToolActionDefinition has readOnly field');
 
@@ -131,8 +143,10 @@ const indexContent = fs.readFileSync('packages/data/src/index.ts', 'utf-8');
 assert(indexContent.includes('isReadOnlyAction'), 'Exports isReadOnlyAction');
 assert(indexContent.includes('listGitHubIssues'), 'Exports listGitHubIssues');
 assert(indexContent.includes('getGitHubIssue'), 'Exports getGitHubIssue');
+assert(indexContent.includes('listGitHubIssueComments'), 'Exports listGitHubIssueComments');
 assert(indexContent.includes('GitHubListIssuesInput'), 'Exports list issues types');
 assert(indexContent.includes('GitHubGetIssueInput'), 'Exports get issue types');
+assert(indexContent.includes('GitHubListIssueCommentsInput'), 'Exports list issue comments types');
 
 // Test 14: No overclaiming
 console.log('\n14. No Overclaiming');
@@ -171,6 +185,7 @@ assert(fs.existsSync('docs/GITHUB_TOOLING.md'), 'GitHub tooling doc exists');
 const toolingDoc = fs.readFileSync('docs/GITHUB_TOOLING.md', 'utf-8');
 assert(toolingDoc.includes('list_issues'), 'Doc covers list issues');
 assert(toolingDoc.includes('get_issue'), 'Doc covers get issue');
+assert(toolingDoc.includes('list_issue_comments'), 'Doc covers list issue comments');
 assert(toolingDoc.includes('Read-Only'), 'Doc explains read-only actions');
 assert(toolingDoc.includes('No Approval Required') || toolingDoc.includes('no approval required'), 'Doc states read-only needs no approval');
 assert(toolingDoc.includes('audit'), 'Doc explains audit logging');

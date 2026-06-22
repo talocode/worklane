@@ -8,6 +8,9 @@ import type {
   GitHubIssueSummary,
   GitHubGetIssueInput,
   GitHubGetIssueResult,
+  GitHubListIssueCommentsInput,
+  GitHubListIssueCommentsResult,
+  GitHubIssueCommentSummary,
   GitHubToolError,
   GitHubErrorCode,
 } from './types';
@@ -362,6 +365,77 @@ export async function getGitHubIssue(
       isPullRequest: !!data.pull_request,
       locked: data.locked || false,
       assignees: Array.isArray(data.assignees) ? data.assignees.map((a: any) => a.login) : [],
+    },
+  };
+}
+
+function validateListIssueCommentsInput(input: Record<string, unknown>): string | null {
+  if (!input.owner || typeof input.owner !== 'string') return 'owner is required and must be a string';
+  if (!input.repo || typeof input.repo !== 'string') return 'repo is required and must be a string';
+  if (input.issueNumber === undefined || input.issueNumber === null) return 'issueNumber is required';
+  if (typeof input.issueNumber !== 'number' || !Number.isInteger(input.issueNumber) || input.issueNumber <= 0) {
+    return 'issueNumber must be a positive integer';
+  }
+  if (input.limit !== undefined && input.limit !== null) {
+    if (typeof input.limit !== 'number' || !Number.isInteger(input.limit) || input.limit < 1) {
+      return 'limit must be a positive integer';
+    }
+    if (input.limit > 50) return 'limit must be 50 or fewer';
+  }
+  return null;
+}
+
+function normalizeComment(raw: any): GitHubIssueCommentSummary {
+  const body = raw.body || '';
+  return {
+    id: raw.id,
+    url: raw.html_url,
+    authorLogin: raw.user?.login || 'unknown',
+    bodyPreview: body.length > 500 ? body.slice(0, 500) + '...' : body,
+    bodyLength: body.length,
+    createdAt: raw.created_at || '',
+    updatedAt: raw.updated_at || '',
+  };
+}
+
+export async function listGitHubIssueComments(
+  input: GitHubListIssueCommentsInput
+): Promise<{ ok: true; result: GitHubListIssueCommentsResult } | { ok: false; error: string; errorCode?: GitHubErrorCode }> {
+  const token = getGithubToken();
+  if (!token) {
+    return { ok: false, error: 'WORKLANE_GITHUB_TOKEN environment variable is not set', errorCode: 'missing_token' };
+  }
+
+  const validationError = validateListIssueCommentsInput(input);
+  if (validationError) {
+    return { ok: false, error: validationError, errorCode: 'validation_error' };
+  }
+
+  const limit = input.limit || 20;
+  const params = new URLSearchParams({ per_page: String(Math.min(limit + 5, 50)) });
+  const url = `${GITHUB_API_BASE}/repos/${input.owner}/${input.repo}/issues/${input.issueNumber}/comments?${params.toString()}`;
+
+  const result = await githubRequestWithRetry(url, token, { method: 'GET' });
+
+  if ('error' in result) {
+    return { ok: false, error: result.error.message, errorCode: result.error.code };
+  }
+
+  const rawComments = JSON.parse(result.body);
+  if (!Array.isArray(rawComments)) {
+    return { ok: false, error: 'Unexpected response format from GitHub API', errorCode: 'unknown' };
+  }
+
+  const comments = rawComments.map(normalizeComment).slice(0, limit);
+
+  return {
+    ok: true,
+    result: {
+      owner: input.owner,
+      repo: input.repo,
+      issueNumber: input.issueNumber,
+      count: comments.length,
+      comments,
     },
   };
 }

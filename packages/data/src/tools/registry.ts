@@ -85,6 +85,27 @@ export const TOOL_REGISTRY: ToolActionDefinition[] = [
       },
     },
   },
+  {
+    id: 'github.list_issue_comments',
+    provider: 'github',
+    type: 'github.list_issue_comments',
+    name: 'List Issue Comments',
+    description: 'List comments on a GitHub issue',
+    riskLevel: 'low',
+    requiresApproval: false,
+    requiredConnectionType: 'github',
+    readOnly: true,
+    inputSchema: {
+      type: 'object',
+      required: ['owner', 'repo', 'issueNumber'],
+      properties: {
+        owner: { type: 'string', description: 'GitHub owner or organization' },
+        repo: { type: 'string', description: 'Repository name' },
+        issueNumber: { type: 'number', description: 'Issue number' },
+        limit: { type: 'number', description: 'Max comments to return (1-50, default 20)' },
+      },
+    },
+  },
 ];
 
 export function getToolAction(actionType: string): ToolActionDefinition | undefined {

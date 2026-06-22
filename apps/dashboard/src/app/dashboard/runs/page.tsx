@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 
-type GitHubAction = 'github.create_issue' | 'github.create_comment' | 'github.list_issues' | 'github.get_issue';
+type GitHubAction = 'github.create_issue' | 'github.create_comment' | 'github.list_issues' | 'github.get_issue' | 'github.list_issue_comments';
 
-const READ_ONLY_ACTIONS: GitHubAction[] = ['github.list_issues', 'github.get_issue'];
+const READ_ONLY_ACTIONS: GitHubAction[] = ['github.list_issues', 'github.get_issue', 'github.list_issue_comments'];
 
 export default function RunsPage() {
   const [runs, setRuns] = useState<any[]>([]);
@@ -55,6 +55,10 @@ export default function RunsPage() {
       if (!issueNumber) { setMessage('Issue number is required'); return; }
       toolInput = { owner, repo, issueNumber: parseInt(issueNumber, 10) };
       taskDescription = `Get GitHub issue #${issueNumber} from ${owner}/${repo}`;
+    } else if (action === 'github.list_issue_comments') {
+      if (!issueNumber) { setMessage('Issue number is required'); return; }
+      toolInput = { owner, repo, issueNumber: parseInt(issueNumber, 10), limit: parseInt(listLimit, 10) || 20 };
+      taskDescription = `List comments on GitHub issue #${issueNumber}`;
     }
 
     const res = await fetch(`/api/agents/${selectedAgent}/run`, {
@@ -111,10 +115,10 @@ export default function RunsPage() {
           {agents.map((a: any) => <option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 6, marginBottom: 8 }}>
-          {(['github.create_issue', 'github.create_comment', 'github.list_issues', 'github.get_issue'] as GitHubAction[]).map(a => (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+          {(['github.create_issue', 'github.create_comment', 'github.list_issues', 'github.get_issue', 'github.list_issue_comments'] as GitHubAction[]).map(a => (
             <button key={a} onClick={() => setAction(a)} style={{ ...btn, background: action === a ? '#3b82f6' : '#2a2a3a', fontSize: 11, padding: '6px 8px' }}>
-              {a === 'github.create_issue' ? 'Create Issue' : a === 'github.create_comment' ? 'Comment' : a === 'github.list_issues' ? 'List Issues' : 'Get Issue'}
+              {a === 'github.create_issue' ? 'Create Issue' : a === 'github.create_comment' ? 'Comment' : a === 'github.list_issues' ? 'List Issues' : a === 'github.get_issue' ? 'Get Issue' : 'List Comments'}
             </button>
           ))}
         </div>
@@ -160,6 +164,14 @@ export default function RunsPage() {
           <input placeholder="Issue number" type="number" value={issueNumber} onChange={e => setIssueNumber(e.target.value)} style={input} />
         )}
 
+        {action === 'github.list_issue_comments' && (
+          <>
+            <input placeholder="Issue number" type="number" value={issueNumber} onChange={e => setIssueNumber(e.target.value)} style={input} />
+            <input placeholder="Limit (1-50)" type="number" value={listLimit} onChange={e => setListLimit(e.target.value)} style={input} />
+            <div style={{ fontSize: 11, color: '#4ade80', marginTop: 4 }}>Comment bodies are shown as previews (max 500 chars).</div>
+          </>
+        )}
+
         <button onClick={createRun} style={btn}>Create Run</button>
         <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>
           {isReadOnly ? 'Read-only actions execute immediately without approval.' : 'Write actions require approval before any GitHub action is performed.'}
@@ -191,6 +203,7 @@ export default function RunsPage() {
               {r.toolAction === 'github.create_comment' && r.toolInput.issueNumber && ` — #${r.toolInput.issueNumber}`}
               {r.toolAction === 'github.list_issues' && ` — state: ${r.toolInput.state || 'open'}, limit: ${r.toolInput.limit || 20}`}
               {r.toolAction === 'github.get_issue' && r.toolInput.issueNumber && ` — #${r.toolInput.issueNumber}`}
+              {r.toolAction === 'github.list_issue_comments' && r.toolInput.issueNumber && ` — #${r.toolInput.issueNumber} (limit: ${r.toolInput.limit || 20})`}
             </div>
           )}
           <div style={{ marginTop: 8, display: 'flex', gap: 6 }}>

@@ -1,5 +1,5 @@
-import type { ToolActionType, GitHubCreateIssueInput, GitHubCreateCommentInput, GitHubListIssuesInput, GitHubGetIssueInput, ToolExecutionResult } from './types';
-import { createGitHubIssue, createGitHubComment, listGitHubIssues, getGitHubIssue } from './github';
+import type { ToolActionType, GitHubCreateIssueInput, GitHubCreateCommentInput, GitHubListIssuesInput, GitHubGetIssueInput, GitHubListIssueCommentsInput, ToolExecutionResult } from './types';
+import { createGitHubIssue, createGitHubComment, listGitHubIssues, getGitHubIssue, listGitHubIssueComments } from './github';
 
 export async function executeToolAction(
   actionType: ToolActionType,
@@ -36,6 +36,14 @@ export async function executeToolAction(
       return {
         ok: true,
         execution: { mode: 'read', provider: 'github', action: 'github.get_issue', result: result.result as unknown as Record<string, unknown> },
+      };
+    }
+    case 'github.list_issue_comments': {
+      const result = await listGitHubIssueComments(input as unknown as GitHubListIssueCommentsInput);
+      if (!result.ok) return { ok: false, error: result.error, errorCode: result.errorCode };
+      return {
+        ok: true,
+        execution: { mode: 'read', provider: 'github', action: 'github.list_issue_comments', result: result.result as unknown as Record<string, unknown> },
       };
     }
     default:

@@ -17,6 +17,7 @@ WorkLane's GitHub tool integration: creating issues, commenting, and inspecting 
 |--------|------|----------|-------------|
 | `github.list_issues` | low | no | List issues in a GitHub repository |
 | `github.get_issue` | low | no | Get details of a specific GitHub issue |
+| `github.list_issue_comments` | low | no | List comments on a GitHub issue |
 
 ## How It Works
 
@@ -117,6 +118,39 @@ curl -X POST http://localhost:3001/api/runs/{runId}/execute
 ### Get Issue Output
 
 Returns: number, title, bodyPreview (max 500 chars), bodyLength, state, url, labels, createdAt, updatedAt, authorLogin, commentCount, isPullRequest, locked, assignees.
+
+## List Issue Comments
+
+```bash
+curl -X POST http://localhost:3001/api/agents/{agentId}/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task": "List comments on issue #12",
+    "toolAction": "github.list_issue_comments",
+    "toolInput": {
+      "owner": "talocode",
+      "repo": "worklane",
+      "issueNumber": 12,
+      "limit": 10
+    },
+    "executionMode": "live"
+  }'
+
+curl -X POST http://localhost:3001/api/runs/{runId}/execute
+```
+
+### List Issue Comments Input
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `owner` | string | yes | — | GitHub owner or organization |
+| `repo` | string | yes | — | Repository name |
+| `issueNumber` | number | yes | — | Issue number |
+| `limit` | number | no | `20` | Max comments to return (1-50) |
+
+### List Issue Comments Output
+
+Returns: owner, repo, issueNumber, count, comments[] (each with id, url, authorLogin, bodyPreview (max 500 chars), bodyLength, createdAt, updatedAt).
 
 ## Create Issue
 

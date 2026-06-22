@@ -10,6 +10,7 @@ export {
   createGitHubComment,
   listGitHubIssues,
   getGitHubIssue,
+  listGitHubIssueComments,
   executeToolAction,
 } from './tools';
 export type {
@@ -36,5 +37,8 @@ export type {
   GitHubIssueSummary,
   GitHubGetIssueInput,
   GitHubGetIssueResult,
+  GitHubListIssueCommentsInput,
+  GitHubListIssueCommentsResult,
+  GitHubIssueCommentSummary,
   ToolExecutionResult,
 } from './tools/types';

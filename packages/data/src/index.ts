@@ -5,8 +5,11 @@ export {
   TOOL_REGISTRY,
   getToolAction,
   listToolActions,
+  isReadOnlyAction,
   createGitHubIssue,
   createGitHubComment,
+  listGitHubIssues,
+  getGitHubIssue,
   executeToolAction,
 } from './tools';
 export type {
@@ -26,5 +29,12 @@ export type {
   ToolActionDefinition,
   GitHubCreateIssueInput,
   GitHubCreateIssueResult,
+  GitHubCreateCommentInput,
+  GitHubCreateCommentResult,
+  GitHubListIssuesInput,
+  GitHubListIssuesResult,
+  GitHubIssueSummary,
+  GitHubGetIssueInput,
+  GitHubGetIssueResult,
   ToolExecutionResult,
 } from './tools/types';

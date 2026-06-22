@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { storage } from '../../../../../../../../packages/data/src/storage';
 import { transitionRun } from '../../../../../../../../packages/data/src/approvals';
 import { executeToolRun, executeSimulated } from '../../../../../../../../packages/data/src/executor';
+import { isReadOnlyAction } from '../../../../../../../../packages/data/src/tools/registry';
 import { ok, badRequest, notFound } from '../../../../../../lib/api/response';
 import { checkAuth } from '../../../../../../lib/api/auth';
 
@@ -14,8 +15,10 @@ export async function POST(request: Request, { params }: { params: { id: string 
     return notFound('Run not found');
   }
 
-  if (run.approvalStatus !== 'approved') {
-    return badRequest('Run must be approved before execution');
+  const readOnly = run.toolAction ? isReadOnlyAction(run.toolAction) : false;
+
+  if (!readOnly && run.approvalStatus !== 'approved') {
+    return badRequest('Write actions must be approved before execution');
   }
 
   if (run.status === 'completed' || run.status === 'failed' || run.status === 'cancelled') {
@@ -67,7 +70,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
   const execution = currentRun.executionMode === 'live' && currentRun.toolAction
     ? {
-        mode: 'real',
+        mode: readOnly ? 'read' : 'real',
         provider: 'github',
         action: currentRun.toolAction,
         result: result.updatedRun.result ? JSON.parse(result.updatedRun.result) : null,

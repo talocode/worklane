@@ -1,6 +1,10 @@
 export type ToolProvider = 'github';
 
-export type ToolActionType = 'github.create_issue' | 'github.create_comment';
+export type ToolActionType =
+  | 'github.create_issue'
+  | 'github.create_comment'
+  | 'github.list_issues'
+  | 'github.get_issue';
 
 export interface ToolActionDefinition {
   id: string;
@@ -9,8 +13,9 @@ export interface ToolActionDefinition {
   name: string;
   description: string;
   riskLevel: 'low' | 'medium' | 'high';
-  requiresApproval: true;
+  requiresApproval: boolean;
   requiredConnectionType: 'github';
+  readOnly?: boolean;
   inputSchema: Record<string, unknown>;
 }
 
@@ -43,8 +48,59 @@ export interface GitHubCreateCommentResult {
   createdAt: string | null;
 }
 
+export interface GitHubListIssuesInput {
+  owner: string;
+  repo: string;
+  state?: 'open' | 'closed' | 'all';
+  labels?: string[];
+  limit?: number;
+  includePullRequests?: boolean;
+}
+
+export interface GitHubIssueSummary {
+  number: number;
+  title: string;
+  state: string;
+  url: string;
+  labels: string[];
+  createdAt: string | null;
+  updatedAt: string | null;
+  authorLogin: string;
+  commentCount: number;
+  isPullRequest: boolean;
+}
+
+export interface GitHubListIssuesResult {
+  issues: GitHubIssueSummary[];
+  totalCount: number;
+  truncated: boolean;
+}
+
+export interface GitHubGetIssueInput {
+  owner: string;
+  repo: string;
+  issueNumber: number;
+}
+
+export interface GitHubGetIssueResult {
+  number: number;
+  title: string;
+  bodyPreview: string;
+  bodyLength: number;
+  state: string;
+  url: string;
+  labels: string[];
+  createdAt: string | null;
+  updatedAt: string | null;
+  authorLogin: string;
+  commentCount: number;
+  isPullRequest: boolean;
+  locked: boolean;
+  assignees: string[];
+}
+
 export interface ToolExecutionResult {
-  mode: 'real';
+  mode: 'real' | 'read';
   provider: string;
   action: string;
   result: Record<string, unknown>;

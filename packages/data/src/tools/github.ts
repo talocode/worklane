@@ -3,6 +3,11 @@ import type {
   GitHubCreateIssueResult,
   GitHubCreateCommentInput,
   GitHubCreateCommentResult,
+  GitHubListIssuesInput,
+  GitHubListIssuesResult,
+  GitHubIssueSummary,
+  GitHubGetIssueInput,
+  GitHubGetIssueResult,
   GitHubToolError,
   GitHubErrorCode,
 } from './types';
@@ -218,6 +223,145 @@ export async function createGitHubComment(
       commentUrl: data.html_url,
       issueNumber: input.issueNumber,
       createdAt: data.created_at || null,
+    },
+  };
+}
+
+function normalizeIssue(raw: any): GitHubIssueSummary {
+  return {
+    number: raw.number,
+    title: raw.title,
+    state: raw.state,
+    url: raw.html_url,
+    labels: Array.isArray(raw.labels) ? raw.labels.map((l: any) => l.name || l) : [],
+    createdAt: raw.created_at || null,
+    updatedAt: raw.updated_at || null,
+    authorLogin: raw.user?.login || 'unknown',
+    commentCount: raw.comments || 0,
+    isPullRequest: !!raw.pull_request,
+  };
+}
+
+function validateListIssuesInput(input: Record<string, unknown>): string | null {
+  if (!input.owner || typeof input.owner !== 'string') return 'owner is required and must be a string';
+  if (!input.repo || typeof input.repo !== 'string') return 'repo is required and must be a string';
+  if (input.state && !['open', 'closed', 'all'].includes(input.state as string)) {
+    return 'state must be "open", "closed", or "all"';
+  }
+  if (input.labels && !Array.isArray(input.labels)) return 'labels must be an array of strings';
+  if (input.limit !== undefined && input.limit !== null) {
+    if (typeof input.limit !== 'number' || !Number.isInteger(input.limit) || input.limit < 1) {
+      return 'limit must be a positive integer';
+    }
+    if (input.limit > 50) return 'limit must be 50 or fewer';
+  }
+  return null;
+}
+
+function validateGetIssueInput(input: Record<string, unknown>): string | null {
+  if (!input.owner || typeof input.owner !== 'string') return 'owner is required and must be a string';
+  if (!input.repo || typeof input.repo !== 'string') return 'repo is required and must be a string';
+  if (input.issueNumber === undefined || input.issueNumber === null) return 'issueNumber is required';
+  if (typeof input.issueNumber !== 'number' || !Number.isInteger(input.issueNumber) || input.issueNumber <= 0) {
+    return 'issueNumber must be a positive integer';
+  }
+  return null;
+}
+
+export async function listGitHubIssues(
+  input: GitHubListIssuesInput
+): Promise<{ ok: true; result: GitHubListIssuesResult } | { ok: false; error: string; errorCode?: GitHubErrorCode }> {
+  const token = getGithubToken();
+  if (!token) {
+    return { ok: false, error: 'WORKLANE_GITHUB_TOKEN environment variable is not set', errorCode: 'missing_token' };
+  }
+
+  const validationError = validateListIssuesInput(input);
+  if (validationError) {
+    return { ok: false, error: validationError, errorCode: 'validation_error' };
+  }
+
+  const state = input.state || 'open';
+  const limit = input.limit || 20;
+  const params = new URLSearchParams({ state, per_page: String(Math.min(limit + 5, 50)) });
+  if (input.labels && input.labels.length > 0) {
+    params.set('labels', input.labels.join(','));
+  }
+
+  const url = `${GITHUB_API_BASE}/repos/${input.owner}/${input.repo}/issues?${params.toString()}`;
+
+  const result = await githubRequestWithRetry(url, token, { method: 'GET' });
+
+  if ('error' in result) {
+    return { ok: false, error: result.error.message, errorCode: result.error.code };
+  }
+
+  const rawIssues = JSON.parse(result.body);
+  if (!Array.isArray(rawIssues)) {
+    return { ok: false, error: 'Unexpected response format from GitHub API', errorCode: 'unknown' };
+  }
+
+  let issues = rawIssues.map(normalizeIssue);
+
+  if (!input.includePullRequests) {
+    issues = issues.filter((i) => !i.isPullRequest);
+  }
+
+  const truncated = issues.length > limit;
+  issues = issues.slice(0, limit);
+
+  return {
+    ok: true,
+    result: {
+      issues,
+      totalCount: issues.length,
+      truncated,
+    },
+  };
+}
+
+export async function getGitHubIssue(
+  input: GitHubGetIssueInput
+): Promise<{ ok: true; result: GitHubGetIssueResult } | { ok: false; error: string; errorCode?: GitHubErrorCode }> {
+  const token = getGithubToken();
+  if (!token) {
+    return { ok: false, error: 'WORKLANE_GITHUB_TOKEN environment variable is not set', errorCode: 'missing_token' };
+  }
+
+  const validationError = validateGetIssueInput(input);
+  if (validationError) {
+    return { ok: false, error: validationError, errorCode: 'validation_error' };
+  }
+
+  const url = `${GITHUB_API_BASE}/repos/${input.owner}/${input.repo}/issues/${input.issueNumber}`;
+
+  const result = await githubRequestWithRetry(url, token, { method: 'GET' });
+
+  if ('error' in result) {
+    return { ok: false, error: result.error.message, errorCode: result.error.code };
+  }
+
+  const data = JSON.parse(result.body);
+  const body = data.body || '';
+  const bodyPreview = body.length > 500 ? body.slice(0, 500) + '...' : body;
+
+  return {
+    ok: true,
+    result: {
+      number: data.number,
+      title: data.title,
+      bodyPreview,
+      bodyLength: body.length,
+      state: data.state,
+      url: data.html_url,
+      labels: Array.isArray(data.labels) ? data.labels.map((l: any) => l.name || l) : [],
+      createdAt: data.created_at || null,
+      updatedAt: data.updated_at || null,
+      authorLogin: data.user?.login || 'unknown',
+      commentCount: data.comments || 0,
+      isPullRequest: !!data.pull_request,
+      locked: data.locked || false,
+      assignees: Array.isArray(data.assignees) ? data.assignees.map((a: any) => a.login) : [],
     },
   };
 }

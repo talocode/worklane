@@ -1,5 +1,5 @@
-export { TOOL_REGISTRY, getToolAction, listToolActions } from './registry';
-export { createGitHubIssue, createGitHubComment } from './github';
+export { TOOL_REGISTRY, getToolAction, listToolActions, isReadOnlyAction } from './registry';
+export { createGitHubIssue, createGitHubComment, listGitHubIssues, getGitHubIssue } from './github';
 export { executeToolAction } from './executor';
 export type {
   ToolProvider,
@@ -9,6 +9,11 @@ export type {
   GitHubCreateIssueResult,
   GitHubCreateCommentInput,
   GitHubCreateCommentResult,
+  GitHubListIssuesInput,
+  GitHubListIssuesResult,
+  GitHubIssueSummary,
+  GitHubGetIssueInput,
+  GitHubGetIssueResult,
   ToolExecutionResult,
   GitHubErrorCode,
   GitHubToolError,

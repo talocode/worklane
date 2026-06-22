@@ -6,6 +6,7 @@ export {
   getToolAction,
   listToolActions,
   createGitHubIssue,
+  createGitHubComment,
   executeToolAction,
 } from './tools';
 export type {

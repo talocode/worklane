@@ -1,16 +1,34 @@
 # GitHub Tooling
 
-WorkLane's first real tool integration: creating GitHub issues through approval-first automation.
+WorkLane's approved GitHub tool integration: creating issues and commenting on issues through approval-first automation.
+
+## Available Actions
+
+### Create GitHub Issue
+
+Creates a new issue in a GitHub repository.
+
+- **Risk level**: medium
+- **Requires approval**: yes
+- **Input**: owner, repo, title, body (optional), labels (optional)
+
+### Comment on GitHub Issue
+
+Adds a comment to an existing GitHub issue.
+
+- **Risk level**: low
+- **Requires approval**: yes
+- **Input**: owner, repo, issueNumber, body
 
 ## How It Works
 
-1. User creates a task run with `toolAction: "github.create_issue"`
+1. User creates a task run with a tool action
 2. Run enters `pending_approval` status
 3. User reviews and approves the run
-4. User clicks Execute (or system executes after approval)
-5. WorkLane calls GitHub REST API to create the issue
+4. User clicks Execute
+5. WorkLane calls GitHub REST API
 6. Result is logged in audit trail
-7. Issue URL is returned to the user
+7. Issue/comment URL is returned
 
 ## Configuration
 
@@ -38,11 +56,6 @@ export WORKLANE_GITHUB_TOKEN=ghp_your_token_here
 ### Via API
 
 ```bash
-# Create an agent first
-curl -X POST http://localhost:3001/api/agents \
-  -H "Content-Type: application/json" \
-  -d '{"name": "GitHub Agent", "description": "Creates GitHub issues"}'
-
 # Create a run with tool action
 curl -X POST http://localhost:3001/api/agents/{agentId}/run \
   -H "Content-Type: application/json" \
@@ -66,14 +79,25 @@ curl -X POST http://localhost:3001/api/runs/{runId}/approve
 curl -X POST http://localhost:3001/api/runs/{runId}/execute
 ```
 
-### Via Dashboard
+## Commenting on a GitHub Issue
 
-1. Go to `/dashboard/runs`
-2. Select an agent
-3. Fill in Owner, Repo, Title, Body, Labels
-4. Click "Create Issue Run"
-5. Approve the run
-6. Click "Execute"
+### Via API
+
+```bash
+curl -X POST http://localhost:3001/api/agents/{agentId}/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task": "Comment on issue #12",
+    "toolAction": "github.create_comment",
+    "toolInput": {
+      "owner": "talocode",
+      "repo": "worklane",
+      "issueNumber": 12,
+      "body": "This has been fixed in the latest commit."
+    },
+    "executionMode": "live"
+  }'
+```
 
 ## Approval Flow
 
@@ -87,38 +111,70 @@ Run created (pending_approval)
   → Run completed or failed
 ```
 
+## Error Handling
+
+WorkLane classifies GitHub API errors into safe error codes:
+
+| Code | Meaning |
+|------|---------|
+| `missing_token` | WORKLANE_GITHUB_TOKEN not set |
+| `unauthorized` | Invalid or expired token |
+| `forbidden` | Insufficient permissions |
+| `not_found` | Repository or resource not found |
+| `validation_error` | Invalid input (bad issue number, missing fields) |
+| `rate_limited` | GitHub API rate limit exceeded |
+| `network_error` | Network connectivity issue |
+| `timeout` | Request timed out |
+
+### Retries
+
+WorkLane automatically retries on transient failures:
+
+- Network errors
+- Timeouts
+- Server errors (5xx)
+
+Retries use exponential backoff:
+- Max 2 retries
+- Base delay: 500ms
+- Max delay: 3000ms
+
+WorkLane does NOT retry:
+- Validation errors (422)
+- Authentication errors (401)
+- Permission errors (403)
+- Not found errors (404)
+
 ## Audit Logging
 
-Every step is logged:
+Every step is logged with safe metadata:
 
-- `run.created` — when the run is created
-- `run.approved` — when the user approves
-- `tool.execution.started` — when execution begins
-- `tool.execution.completed` — on success
-- `tool.execution.failed` — on failure
-- `run.completed` — final status
+- `tool.execution.started` — includes action type, owner, repo (no token)
+- `tool.execution.completed` — includes action type, result summary
+- `tool.execution.failed` — includes action type, error code (no sensitive details)
 
-Audit events never include the GitHub token.
+Audit events never include:
+- GitHub tokens
+- Authorization headers
+- Full request/response bodies
+- Raw API credentials
+
+## Rate Limiting
+
+When GitHub returns a rate limit error:
+- WorkLane returns the `rate_limited` error code
+- Includes `retryAfterSeconds` hint if available
+- User can wait and retry manually
 
 ## Limitations (v0.1)
 
-- Only `github.create_issue` is implemented
-- No issue editing, closing, or commenting
+- Only `github.create_issue` and `github.create_comment` are implemented
+- No issue editing, closing, or deleting
 - No pull request operations
 - No repository management
 - No branch operations
 - No GitHub Actions triggers
-- Single token per workspace
-- No rate limit handling
 - No webhook integration
-
-## What's Not Implemented Yet
-
-- Issue updates and comments
-- Pull request creation
-- Branch management
-- GitHub Actions triggers
-- Webhook receivers
-- Multi-token support
-- Rate limit backoff
-- GitHub App authentication
+- Single token per workspace
+- No multi-token support
+- No GitHub App authentication

@@ -22,6 +22,26 @@ export const TOOL_REGISTRY: ToolActionDefinition[] = [
       },
     },
   },
+  {
+    id: 'github.create_comment',
+    provider: 'github',
+    type: 'github.create_comment',
+    name: 'Comment on GitHub Issue',
+    description: 'Add a comment to an existing GitHub issue',
+    riskLevel: 'low',
+    requiresApproval: true,
+    requiredConnectionType: 'github',
+    inputSchema: {
+      type: 'object',
+      required: ['owner', 'repo', 'issueNumber', 'body'],
+      properties: {
+        owner: { type: 'string', description: 'GitHub owner or organization' },
+        repo: { type: 'string', description: 'Repository name' },
+        issueNumber: { type: 'number', description: 'Issue number' },
+        body: { type: 'string', description: 'Comment body text' },
+      },
+    },
+  },
 ];
 
 export function getToolAction(actionType: string): ToolActionDefinition | undefined {

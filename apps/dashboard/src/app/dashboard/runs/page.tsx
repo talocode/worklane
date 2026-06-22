@@ -2,16 +2,20 @@
 
 import { useEffect, useState } from 'react';
 
+type GitHubAction = 'github.create_issue' | 'github.create_comment';
+
 export default function RunsPage() {
   const [runs, setRuns] = useState<any[]>([]);
   const [agents, setAgents] = useState<any[]>([]);
   const [selectedAgent, setSelectedAgent] = useState('');
-  const [task, setTask] = useState('');
+  const [action, setAction] = useState<GitHubAction>('github.create_issue');
   const [owner, setOwner] = useState('');
   const [repo, setRepo] = useState('');
   const [issueTitle, setIssueTitle] = useState('');
   const [issueBody, setIssueBody] = useState('');
   const [issueLabels, setIssueLabels] = useState('');
+  const [issueNumber, setIssueNumber] = useState('');
+  const [commentBody, setCommentBody] = useState('');
   const [message, setMessage] = useState('');
 
   const load = () => {
@@ -20,31 +24,47 @@ export default function RunsPage() {
   };
   useEffect(() => { load(); }, []);
 
-  const createIssueRun = async () => {
-    if (!selectedAgent || !owner || !repo || !issueTitle) {
-      setMessage('Agent, owner, repo, and title are required');
+  const createRun = async () => {
+    if (!selectedAgent || !owner || !repo) {
+      setMessage('Agent, owner, and repo are required');
       return;
+    }
+
+    let toolInput: Record<string, unknown> = {};
+    let taskDescription = '';
+
+    if (action === 'github.create_issue') {
+      if (!issueTitle) { setMessage('Issue title is required'); return; }
+      toolInput = {
+        owner, repo,
+        title: issueTitle,
+        body: issueBody || undefined,
+        labels: issueLabels ? issueLabels.split(',').map(l => l.trim()).filter(Boolean) : undefined,
+      };
+      taskDescription = `Create GitHub issue: ${issueTitle}`;
+    } else {
+      if (!issueNumber || !commentBody) { setMessage('Issue number and comment body are required'); return; }
+      toolInput = {
+        owner, repo,
+        issueNumber: parseInt(issueNumber, 10),
+        body: commentBody,
+      };
+      taskDescription = `Comment on GitHub issue #${issueNumber}`;
     }
 
     const res = await fetch(`/api/agents/${selectedAgent}/run`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        task: `Create GitHub issue: ${issueTitle}`,
-        toolAction: 'github.create_issue',
-        toolInput: {
-          owner,
-          repo,
-          title: issueTitle,
-          body: issueBody || undefined,
-          labels: issueLabels ? issueLabels.split(',').map(l => l.trim()).filter(Boolean) : undefined,
-        },
+        task: taskDescription,
+        toolAction: action,
+        toolInput,
         executionMode: 'live',
       }),
     });
     const data = await res.json();
     setMessage(`Run created: ${data.run?.id} — approval required before execution`);
-    setIssueTitle(''); setIssueBody(''); setIssueLabels('');
+    setIssueTitle(''); setIssueBody(''); setIssueLabels(''); setIssueNumber(''); setCommentBody('');
     load();
   };
 
@@ -59,7 +79,13 @@ export default function RunsPage() {
     const res = await fetch(`/api/runs/${id}/execute`, { method: 'POST' });
     const data = await res.json();
     if (data.ok) {
-      setMessage(`Execution complete: ${data.execution?.mode === 'real' ? 'Real' : 'Simulated'}`);
+      const mode = data.execution?.mode === 'real' ? 'Real' : 'Simulated';
+      const summary = data.execution?.result?.issueNumber
+        ? `Issue #${data.execution.result.issueNumber}`
+        : data.execution?.result?.commentUrl
+          ? `Comment posted`
+          : '';
+      setMessage(`Execution complete (${mode})${summary ? ': ' + summary : ''}`);
     } else {
       setMessage(`Execution failed: ${data.error}`);
     }
@@ -75,26 +101,45 @@ export default function RunsPage() {
     <div style={{ padding: '32px 40px', maxWidth: 800 }}>
       <h1 style={{ fontSize: 24, fontWeight: 600, marginBottom: 8 }}>Task Runs</h1>
       <div style={{ padding: '8px 12px', background: '#1a1a2e', border: '1px solid #2a2a3a', borderRadius: 6, marginBottom: 24, fontSize: 13, color: '#fbbf24' }}>
-        GitHub issue creation requires approval before execution. Token is read from WORKLANE_GITHUB_TOKEN env.
+        GitHub actions require approval before execution. Token is read from WORKLANE_GITHUB_TOKEN env.
       </div>
 
       {message && <div style={{ padding: '8px 12px', background: '#1a1a2e', border: '1px solid #3b82f6', borderRadius: 6, marginBottom: 16, fontSize: 13, color: '#60a5fa' }}>{message}</div>}
 
       <div style={{ padding: 20, background: '#16161e', border: '1px solid #2a2a3a', borderRadius: 8, marginBottom: 24 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Create GitHub Issue Run</h2>
+        <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Create GitHub Action Run</h2>
+
         <select value={selectedAgent} onChange={e => setSelectedAgent(e.target.value)} style={input}>
           <option value="">Select agent...</option>
           {agents.map((a: any) => <option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
+
+        <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+          <button onClick={() => setAction('github.create_issue')} style={{ ...btn, background: action === 'github.create_issue' ? '#3b82f6' : '#2a2a3a', flex: 1 }}>Create Issue</button>
+          <button onClick={() => setAction('github.create_comment')} style={{ ...btn, background: action === 'github.create_comment' ? '#3b82f6' : '#2a2a3a', flex: 1 }}>Comment on Issue</button>
+        </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           <input placeholder="Owner (e.g. talocode)" value={owner} onChange={e => setOwner(e.target.value)} style={input} />
           <input placeholder="Repo (e.g. worklane)" value={repo} onChange={e => setRepo(e.target.value)} style={input} />
         </div>
-        <input placeholder="Issue title" value={issueTitle} onChange={e => setIssueTitle(e.target.value)} style={input} />
-        <textarea placeholder="Issue body (optional)" value={issueBody} onChange={e => setIssueBody(e.target.value)} style={{ ...input, minHeight: 60 }} />
-        <input placeholder="Labels (comma-separated, optional)" value={issueLabels} onChange={e => setIssueLabels(e.target.value)} style={input} />
-        <button onClick={createIssueRun} style={btn}>Create Issue Run</button>
-        <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>This will create a run that requires approval before any GitHub issue is created.</div>
+
+        {action === 'github.create_issue' ? (
+          <>
+            <input placeholder="Issue title" value={issueTitle} onChange={e => setIssueTitle(e.target.value)} style={input} />
+            <textarea placeholder="Issue body (optional)" value={issueBody} onChange={e => setIssueBody(e.target.value)} style={{ ...input, minHeight: 60 }} />
+            <input placeholder="Labels (comma-separated, optional)" value={issueLabels} onChange={e => setIssueLabels(e.target.value)} style={input} />
+          </>
+        ) : (
+          <>
+            <input placeholder="Issue number" type="number" value={issueNumber} onChange={e => setIssueNumber(e.target.value)} style={input} />
+            <textarea placeholder="Comment body" value={commentBody} onChange={e => setCommentBody(e.target.value)} style={{ ...input, minHeight: 60 }} />
+            <div style={{ fontSize: 11, color: '#fbbf24', marginTop: 4 }}>Comment will be posted only after approval and execution.</div>
+          </>
+        )}
+
+        <button onClick={createRun} style={btn}>Create Run</button>
+        <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>This will create a run that requires approval before any GitHub action is performed.</div>
       </div>
 
       <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Runs ({runs.length})</h2>
@@ -117,7 +162,10 @@ export default function RunsPage() {
           </div>
           {r.toolInput && (
             <div style={{ fontSize: 11, color: '#666', marginTop: 4, fontFamily: 'monospace' }}>
-              {r.toolInput.owner}/{r.toolInput.repo} — {r.toolInput.title}
+              {r.toolInput.owner}/{r.toolInput.repo}
+              {r.toolAction === 'github.create_issue' && r.toolInput.title && ` — ${r.toolInput.title}`}
+              {r.toolAction === 'github.create_comment' && r.toolInput.issueNumber && ` — #${r.toolInput.issueNumber}`}
+              {r.toolAction === 'github.create_comment' && r.toolInput.body && ` — ${String(r.toolInput.body).slice(0, 60)}${String(r.toolInput.body).length > 60 ? '...' : ''}`}
             </div>
           )}
           <div style={{ marginTop: 8, display: 'flex', gap: 6 }}>

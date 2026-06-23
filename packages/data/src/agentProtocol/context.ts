@@ -1,0 +1,60 @@
+import type { AgentContextProvider } from './types';
+
+export const WORKLANE_CONTEXT_PROVIDERS: AgentContextProvider[] = [
+  {
+    id: 'worklane.agents',
+    product: 'worklane',
+    title: 'Team Agents',
+    description: 'List of agents available in the workspace',
+    provides: ['agent.list', 'agent.get', 'agent.capabilities'],
+    privacyLevel: 'workspace',
+  },
+  {
+    id: 'worklane.knowledge',
+    product: 'worklane',
+    title: 'Shared Knowledge',
+    description: 'Workspace knowledge base documents and context',
+    provides: ['knowledge.list', 'knowledge.get', 'knowledge.search'],
+    privacyLevel: 'workspace',
+  },
+  {
+    id: 'worklane.connections',
+    product: 'worklane',
+    title: 'Tool Connections',
+    description: 'Configured tool connections (GitHub, Slack, etc.)',
+    provides: ['connection.list', 'connection.status'],
+    privacyLevel: 'private',
+  },
+  {
+    id: 'worklane.runs',
+    product: 'worklane',
+    title: 'Task Runs',
+    description: 'History of agent task runs and their results',
+    provides: ['run.list', 'run.get', 'run.status'],
+    privacyLevel: 'workspace',
+  },
+  {
+    id: 'worklane.audit',
+    product: 'worklane',
+    title: 'Audit Trail',
+    description: 'Audit log of all agent and user actions',
+    provides: ['audit.list', 'audit.get'],
+    privacyLevel: 'private',
+  },
+  {
+    id: 'github.issues',
+    product: 'worklane',
+    title: 'GitHub Issues',
+    description: 'Issues from connected GitHub repositories',
+    provides: ['issue.list', 'issue.get', 'issue.search'],
+    privacyLevel: 'public',
+  },
+  {
+    id: 'github.issue_comments',
+    product: 'worklane',
+    title: 'GitHub Issue Comments',
+    description: 'Comments on connected GitHub issues',
+    provides: ['comment.list', 'comment.get'],
+    privacyLevel: 'public',
+  },
+];

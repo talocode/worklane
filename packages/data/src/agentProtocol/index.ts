@@ -15,3 +15,13 @@ export { WORKLANE_CONTEXT_PROVIDERS } from './context';
 export { PERMISSION_DEFINITIONS, requirePermission, requiresApproval } from './permissions';
 export { createAuditEvent, safeAuditMetadata } from './audit';
 export { PROTOCOL_ERRORS, protocolError } from './errors';
+export {
+  resolveProtocolAction,
+  validateProtocolActionInput,
+  canExecuteProtocolAction,
+  createProtocolRun,
+  formatProtocolActionResult,
+  getContextProviders,
+  getContextProvider,
+} from './execution';
+export type { ProtocolRunInput } from './execution';

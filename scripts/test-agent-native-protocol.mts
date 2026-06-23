@@ -120,5 +120,65 @@ for (const file of filesToCheck) {
 }
 assert(noOverclaim, 'No overclaiming language')
 
+// Test 11: Execution bridge exists
+console.log('\n11. Execution Bridge')
+assert(fs.existsSync('packages/data/src/agentProtocol/execution.ts'), 'Execution bridge exists')
+const exec = fs.readFileSync('packages/data/src/agentProtocol/execution.ts', 'utf-8')
+assert(exec.includes('resolveProtocolAction'), 'Has resolveProtocolAction')
+assert(exec.includes('validateProtocolActionInput'), 'Has validateProtocolActionInput')
+assert(exec.includes('createProtocolRun'), 'Has createProtocolRun')
+assert(exec.includes('canExecuteProtocolAction'), 'Has canExecuteProtocolAction')
+assert(exec.includes('formatProtocolActionResult'), 'Has formatProtocolActionResult')
+
+// Test 12: Protocol run API endpoints
+console.log('\n12. Protocol API Endpoints')
+assert(fs.existsSync('apps/dashboard/src/app/api/agent-protocol/actions/route.ts'), 'Actions endpoint exists')
+assert(fs.existsSync('apps/dashboard/src/app/api/agent-protocol/context/route.ts'), 'Context endpoint exists')
+assert(fs.existsSync('apps/dashboard/src/app/api/agent-protocol/runs/route.ts'), 'Runs endpoint exists')
+assert(fs.existsSync('apps/dashboard/src/app/api/agent-protocol/runs/[id]/approve/route.ts'), 'Approve endpoint exists')
+assert(fs.existsSync('apps/dashboard/src/app/api/agent-protocol/runs/[id]/execute/route.ts'), 'Execute endpoint exists')
+
+const runsEndpoint = fs.readFileSync('apps/dashboard/src/app/api/agent-protocol/runs/route.ts', 'utf-8')
+assert(runsEndpoint.includes('NextResponse.json'), 'Runs endpoint returns JSON')
+assert(runsEndpoint.includes('createProtocolRun'), 'Uses createProtocolRun')
+
+const approveEndpoint = fs.readFileSync('apps/dashboard/src/app/api/agent-protocol/runs/[id]/approve/route.ts', 'utf-8')
+assert(approveEndpoint.includes('pending_approval'), 'Checks pending_approval status')
+
+const executeEndpoint = fs.readFileSync('apps/dashboard/src/app/api/agent-protocol/runs/[id]/execute/route.ts', 'utf-8')
+assert(executeEndpoint.includes('readOnly'), 'Checks readOnly for approval bypass')
+assert(executeEndpoint.includes('approved'), 'Checks approved status for write actions')
+
+// Test 13: Approval workflow UI
+console.log('\n13. Approval Workflow UI')
+assert(fs.existsSync('apps/dashboard/src/app/dashboard/approvals/page.tsx'), 'Approvals page exists')
+const approvalsPage = fs.readFileSync('apps/dashboard/src/app/dashboard/approvals/page.tsx', 'utf-8')
+assert(approvalsPage.includes('pending_approval'), 'Shows pending approvals')
+assert(approvalsPage.includes('Approve'), 'Has approve button')
+assert(approvalsPage.includes('Execute'), 'Has execute button')
+
+// Test 14: Action catalog UI
+console.log('\n14. Action Catalog UI')
+assert(fs.existsSync('apps/dashboard/src/app/dashboard/actions/page.tsx'), 'Actions page exists')
+const actionsPage = fs.readFileSync('apps/dashboard/src/app/dashboard/actions/page.tsx', 'utf-8')
+assert(actionsPage.includes('Action Catalog'), 'Has title')
+assert(actionsPage.includes('READ'), 'Shows READ badge')
+assert(actionsPage.includes('WRITE'), 'Shows WRITE badge')
+assert(actionsPage.includes('riskLevel'), 'Shows risk level')
+
+// Test 15: Context provider UI
+console.log('\n15. Context Provider UI')
+assert(fs.existsSync('apps/dashboard/src/app/dashboard/context/page.tsx'), 'Context page exists')
+const contextPage = fs.readFileSync('apps/dashboard/src/app/dashboard/context/page.tsx', 'utf-8')
+assert(contextPage.includes('Context Providers'), 'Has title')
+assert(contextPage.includes('privacyLevel'), 'Shows privacy level')
+assert(contextPage.includes('provides'), 'Shows provides list')
+
+// Test 16: Runs page updated
+console.log('\n16. Runs Page Updated')
+const runsPage = fs.readFileSync('apps/dashboard/src/app/dashboard/runs/page.tsx', 'utf-8')
+assert(runsPage.includes('toolAction'), 'Shows tool action')
+assert(runsPage.includes('Actions'), 'Links to actions page')
+
 console.log(`\n=== Results: ${passed} passed, ${failed} failed ===\n`)
 process.exit(failed > 0 ? 1 : 0)

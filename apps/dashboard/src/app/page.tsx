@@ -13,6 +13,8 @@ export default function Home() {
         <a href="/dashboard/knowledge" style={cardStyle}>Knowledge →</a>
         <a href="/dashboard/connections" style={cardStyle}>Connections →</a>
         <a href="/dashboard/runs" style={cardStyle}>Task Runs →</a>
+        <a href="/dashboard/harness" style={cardStyle}>Harness Runtime →</a>
+        <a href="/dashboard/tool-gateway" style={cardStyle}>Tool Gateway →</a>
         <a href="/dashboard/audit" style={cardStyle}>Audit Log →</a>
       </div>
       <p style={{ marginTop: 40, fontSize: 12, color: '#555' }}>

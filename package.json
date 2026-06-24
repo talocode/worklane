@@ -18,7 +18,8 @@
     "test": "npm run test --workspaces",
     "lint": "npm run lint --workspaces",
     "clean": "npm run clean --workspaces",
-    "dev": "npm run dev --workspaces"
+    "dev": "npm run dev --workspaces",
+    "test:tool-gateway": "npx tsx scripts/test-tool-gateway-v010.mjs"
   },
   "keywords": [
     "ai",

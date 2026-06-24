@@ -180,3 +180,57 @@ Create a trigger.
 List audit events.
 
 **Query params:** `?limit=50&offset=0&actorType=agent&action=run.created`
+
+---
+
+## Tool Gateway
+
+### GET /api/tool-gateway/health
+> ✅ Implemented
+
+Return Tool Gateway status and storage paths.
+
+### GET /api/tool-gateway/sources
+> ✅ Implemented
+
+List configured sources.
+
+### POST /api/tool-gateway/sources
+> ✅ Implemented
+
+Create a source using auth metadata only. Store env var names, never values.
+
+### GET /api/tool-gateway/tools
+> ✅ Implemented
+
+List normalized tools, including default Talocode placeholder tools.
+
+### POST /api/tool-gateway/tools/register
+> ✅ Implemented
+
+Register a local or configured tool definition.
+
+### POST /api/tool-gateway/calls
+> ✅ Implemented
+
+Create a tool call and apply approval rules.
+
+### GET /api/tool-gateway/calls
+> ✅ Implemented
+
+List tool calls.
+
+### GET /api/tool-gateway/calls/:id
+> ✅ Implemented
+
+Get one tool call.
+
+### POST /api/tool-gateway/calls/:id/approve
+> ✅ Implemented
+
+Approve a pending tool call.
+
+### POST /api/tool-gateway/calls/:id/run
+> ✅ Implemented
+
+Execute a deterministic placeholder handler or return a safe not-connected result.

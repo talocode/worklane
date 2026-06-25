@@ -6,6 +6,8 @@ export type RoutineStatus = 'active' | 'paused' | 'archived';
 
 export type AutomationRunStatus = 'pending_approval' | 'approved' | 'scheduled' | 'running' | 'completed' | 'failed' | 'cancelled';
 
+export type AutomationApprovalStatus = 'pending' | 'approved' | 'rejected' | 'expired';
+
 export type PermissionProfile = 'read_only' | 'draft_only' | 'approval_required' | 'manual_only';
 
 export interface AutomationReport {
@@ -65,7 +67,14 @@ export interface AutomationRunRecord {
   triggerType: AutomationTriggerType;
   runMode: 'manual' | 'scheduler';
   scheduledFor?: string;
+  approvalStatus: AutomationApprovalStatus;
   approvedAt?: string;
+  approvedBy?: string;
+  rejectedAt?: string;
+  rejectedBy?: string;
+  rejectionReason?: string;
+  handoffStatus?: 'not_started' | 'queued' | 'handed_off' | 'failed';
+  handoffTarget?: 'tool_gateway' | 'worklane_run' | 'manual';
   createdAt: string;
   updatedAt: string;
   report?: AutomationReport;

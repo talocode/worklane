@@ -6,6 +6,8 @@ It lets builders configure tool sources once, normalize them into a common schem
 
 In v0.1, Loops & Routines can reference Tool Gateway tool ids, but automation still creates approval-first run records instead of directly executing external actions.
 
+Automation approvals can hand off approved runs into Tool Gateway call creation. That handoff still respects source enabled state, tool enabled state, auth configuration checks, and Tool Gateway approval rules.
+
 ## What it is
 
 Tool Gateway adds one normalized interface for:

@@ -24,6 +24,8 @@ function createLoopRun(loop: WorkLaneLoop, scheduledFor: string): AutomationRunR
     triggerType: 'schedule',
     runMode: 'scheduler',
     scheduledFor,
+    approvalStatus: 'pending',
+    handoffStatus: 'not_started',
     createdAt: now,
     updatedAt: now,
   };

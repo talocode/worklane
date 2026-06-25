@@ -16,6 +16,7 @@ WorkLane is a local-first command center where teams can create agents, share kn
 - **Task Runs** — Run agent tasks with approval gates and audit trails
 - **Tool Gateway** — Register approved tools once and expose them through one normalized interface
 - **Loops & Routines** — Turn repeatable work into local-first, approval-first automations
+- **Automation Approvals** — Review pending automation runs before any handoff happens
 - **Approval-First** — Destructive actions require explicit human approval
 - **Audit Logging** — Every agent action recorded and reviewable
 - **Simulated Execution** — Clear labeling when tools aren't connected

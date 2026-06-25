@@ -22,6 +22,17 @@ WorkLane Loops & Routines adds the local-first automation layer on top of Tool G
 - destructive work is never auto-executed
 - write, destructive, and external tool usage stays behind Tool Gateway permission checks
 
+## Approval Workflow
+
+Automation Approval UI adds a review layer for pending runs:
+
+- list pending approval runs
+- approve a run
+- reject a run with optional reason
+- hand off an approved run safely
+
+Approved runs do not skip Tool Gateway safety checks. Rejected runs do not execute anything.
+
 ## Permission Profiles
 
 - `read_only`
@@ -72,6 +83,11 @@ In v0.1, schedule and manual are the primary working paths. API, chat, and GitHu
 - `POST /api/automation/routines/:id/archive`
 - `GET /api/automation/runs`
 - `GET /api/automation/runs/:id`
+- `GET /api/automation/approvals`
+- `GET /api/automation/approvals/:id`
+- `POST /api/automation/approvals/:id/approve`
+- `POST /api/automation/approvals/:id/reject`
+- `POST /api/automation/approvals/:id/handoff`
 
 All responses are JSON-only.
 
@@ -80,11 +96,14 @@ All responses are JSON-only.
 - loops and routines may reference Tool Gateway tool ids
 - Tool Gateway permission checks are reused before accepting automation definitions
 - v0.1 automation creates approval-first automation run records rather than directly executing external actions
+- approved automation runs can hand off into Tool Gateway call creation
+- destructive and external tool handoff still results in Tool Gateway approval-first calls
 
 ## Audit and History
 
 - create, pause, resume, cancel, archive, and run events are stored in local automation history
 - reports are attached to automation run records
+- approval, rejection, and handoff events are recorded in local history and audit
 
 ## Examples
 

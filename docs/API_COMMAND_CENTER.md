@@ -318,3 +318,28 @@ List automation runs. A scheduler tick may create new pending approval runs whil
 > ✅ Implemented
 
 Get one automation run.
+
+### GET /api/automation/approvals
+> ✅ Implemented
+
+List pending and recent automation approval runs.
+
+### GET /api/automation/approvals/:id
+> ✅ Implemented
+
+Get one automation approval detail.
+
+### POST /api/automation/approvals/:id/approve
+> ✅ Implemented
+
+Mark an automation run approved.
+
+### POST /api/automation/approvals/:id/reject
+> ✅ Implemented
+
+Mark an automation run rejected with optional reason.
+
+### POST /api/automation/approvals/:id/handoff
+> ✅ Implemented
+
+Hand an approved automation run off to Tool Gateway or mark manual handoff required.

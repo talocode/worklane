@@ -110,6 +110,8 @@ export function runRoutineNow(routine: WorkLaneRoutine): AutomationRunRecord {
     permissionProfile: routine.permissionProfile,
     triggerType: routine.triggerType,
     runMode: 'manual',
+    approvalStatus: 'pending',
+    handoffStatus: 'not_started',
     createdAt: now,
     updatedAt: now,
   };

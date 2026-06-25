@@ -99,6 +99,7 @@ All responses are JSON-only.
 - approved automation runs can hand off into Tool Gateway call creation
 - destructive and external tool handoff still results in Tool Gateway approval-first calls
 - handed-off calls can appear in Execution Queue without auto-running
+- execution queue keeps post-handoff review visible before any safe supported run step
 
 ## Audit and History
 

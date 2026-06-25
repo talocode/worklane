@@ -100,6 +100,7 @@ These are placeholder planning and inspection tools in v0.1.
 - `GET /api/tool-gateway/calls`
 - `GET /api/tool-gateway/calls/:id`
 - `POST /api/tool-gateway/calls/:id/approve`
+- `POST /api/tool-gateway/calls/:id/queue`
 - `POST /api/tool-gateway/calls/:id/run`
 
 All responses are JSON-only.
@@ -119,3 +120,4 @@ All responses are JSON-only.
 - no external marketplace
 - no billing layer
 - placeholder Talocode tools only in v0.1
+- execution queue adds the visible post-approval layer, but only safe supported placeholder handlers can run in v0.1

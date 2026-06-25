@@ -230,10 +230,54 @@ Get one tool call.
 
 Approve a pending tool call.
 
+### POST /api/tool-gateway/calls/:id/queue
+> ✅ Implemented
+
+Queue an approved Tool Gateway call for execution review.
+
 ### POST /api/tool-gateway/calls/:id/run
 > ✅ Implemented
 
 Execute a deterministic placeholder handler or return a safe not-connected result.
+
+---
+
+## Execution Queue
+
+### GET /api/execution/health
+> ✅ Implemented
+
+Return execution queue status and storage paths.
+
+### GET /api/execution/queue
+> ✅ Implemented
+
+List execution queue items.
+
+### GET /api/execution/queue/:id
+> ✅ Implemented
+
+Get one execution queue item.
+
+### POST /api/execution/queue/:id/run
+> ✅ Implemented
+
+Run an execution queue item only when it is safe and supported.
+
+### POST /api/execution/queue/:id/manual
+> ✅ Implemented
+
+Mark a queue item as manual-required with optional reason.
+
+### POST /api/execution/queue/:id/cancel
+> ✅ Implemented
+
+Cancel a queued, ready, blocked, or manual-required queue item.
+
+### GET /api/execution/history
+> ✅ Implemented
+
+List local execution queue history.
 
 ---
 

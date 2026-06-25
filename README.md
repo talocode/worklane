@@ -79,8 +79,9 @@ Local JSON Storage (.worklane/*.json)
 - Tool Gateway with normalized source and tool records
 - Loops and routines with local scheduler foundations
 - Dashboard UI
-- Local JSON storage
-- Simulated execution
+ - Execution Queue review layer
+ - Local JSON storage
+ - Simulated execution
 
 ## What's Planned
 
@@ -102,6 +103,7 @@ Local JSON Storage (.worklane/*.json)
 - [Roadmap](docs/ROADMAP.md)
 - [Tool Gateway](docs/TOOL_GATEWAY.md)
 - [Loops & Routines](docs/LOOPS_AND_ROUTINES.md)
+- [Execution Queue](docs/EXECUTION_QUEUE.md)
 
 ## Contributing
 

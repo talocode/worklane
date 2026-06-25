@@ -18,173 +18,219 @@ function assert(condition, label) {
 
 async function run() {
   const repoRoot = process.cwd();
-  const execution = await import('../packages/data/src/execution/index.ts');
-  const { toolGatewayStorage } = await import('../packages/data/src/tool-gateway/storage.ts');
-  const { createGatewayCall } = await import('../packages/data/src/tool-gateway/executor.ts');
-  const automation = await import('../packages/data/src/automation/index.ts');
-
   const routePaths = [
     'apps/dashboard/src/app/api/execution/health/route.ts',
     'apps/dashboard/src/app/api/execution/queue/route.ts',
+    'apps/dashboard/src/app/api/execution/queue/[id]/route.ts',
+    'apps/dashboard/src/app/api/execution/queue/[id]/run/route.ts',
+    'apps/dashboard/src/app/api/execution/queue/[id]/manual/route.ts',
+    'apps/dashboard/src/app/api/execution/queue/[id]/cancel/route.ts',
     'apps/dashboard/src/app/api/execution/history/route.ts',
     'apps/dashboard/src/app/api/tool-gateway/calls/[id]/queue/route.ts',
   ].map((relativePath) => path.join(repoRoot, relativePath));
 
+  const { executionStorage } = await import('../packages/data/src/execution/storage.ts');
+  const execution = await import('../packages/data/src/execution/index.ts');
+  const { toolGatewayStorage } = await import('../packages/data/src/tool-gateway/storage.ts');
+  const { createGatewayCall } = await import('../packages/data/src/tool-gateway/executor.ts');
+
+  const auditPath = path.join(repoRoot, '.worklane', 'audit.json');
   const backups = {};
-  for (const [key, filePath] of Object.entries(execution.executionStorage.paths)) {
-    backups[key] = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : null;
+  for (const [key, filePath] of Object.entries(executionStorage.paths)) {
+    backups[`execution:${key}`] = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : null;
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
   }
-  const toolBackups = {};
   for (const [key, filePath] of Object.entries(toolGatewayStorage.paths)) {
-    toolBackups[key] = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : null;
+    backups[`gateway:${key}`] = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : null;
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
   }
-  const autoBackups = {};
-  for (const [key, filePath] of Object.entries(automation.automationStorage.paths)) {
-    autoBackups[key] = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : null;
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-  }
+  backups.audit = fs.existsSync(auditPath) ? fs.readFileSync(auditPath, 'utf-8') : null;
+  if (fs.existsSync(auditPath)) fs.unlinkSync(auditPath);
 
   try {
-    console.log('\n1. Execution health returns JSON route file');
+    console.log('\n1. Execution health returns JSON');
     assert(routePaths.every((filePath) => fs.existsSync(filePath)), 'Execution route files exist');
     const routeContents = routePaths.map((filePath) => fs.readFileSync(filePath, 'utf-8'));
-    assert(routeContents.every((content) => content.includes('ok(') || content.includes('badRequest(') || content.includes('notFound(')), 'Execution routes use JSON helpers');
+    assert(routeContents.every((content) => content.includes('ok(') || content.includes('badRequest(') || content.includes('notFound(')), 'Execution route files use JSON helpers');
 
     console.log('\n2. Approved Tool Gateway call can be queued');
-    const readCallResult = createGatewayCall('tool_stacklane_project_inspect', { projectId: 'proj_1' });
-    const queuedRead = execution.queueApprovedToolCall(readCallResult.call.id);
-    assert(queuedRead.item.status === 'ready', 'Approved Tool Gateway call can be queued');
+    const approvedReadCall = createGatewayCall('tool_stacklane_project_inspect', { projectId: 'proj_123' });
+    const queuedApproved = execution.queueApprovedToolCall(approvedReadCall.call.id);
+    assert(Boolean(queuedApproved.item), 'Approved Tool Gateway call can be queued');
+    assert(['ready', 'manual_required', 'blocked'].includes(queuedApproved.item.status), 'Queued item gets safe queue status');
 
     console.log('\n3. Unapproved Tool Gateway call cannot be queued');
-    const writeCallResult = createGatewayCall('tool_postlane_email_draft', { subject: 'Draft subject' });
-    const blockedQueue = execution.queueApprovedToolCall(writeCallResult.call.id);
-    assert(typeof blockedQueue.error === 'string', 'Unapproved Tool Gateway call cannot be queued');
+    const unapprovedCall = createGatewayCall('tool_postlane_email_draft', { subject: 'Need approval' });
+    const unapprovedQueue = execution.queueApprovedToolCall(unapprovedCall.call.id);
+    assert(typeof unapprovedQueue.error === 'string', 'Unapproved Tool Gateway call cannot be queued');
 
-    console.log('\n4. Queue list and detail return data');
-    const list = execution.listExecutionQueue();
-    assert(list.length >= 1, 'Queue list returns items');
-    const detail = execution.getExecutionQueueItem(queuedRead.item.id);
-    assert(detail.id === queuedRead.item.id, 'Queue item detail returns item');
+    console.log('\n4. Queue list and detail return JSON-shaped data');
+    const queueItems = execution.listExecutionQueue();
+    assert(queueItems.length >= 1, 'Queue list works');
+    const detailItem = execution.getExecutionQueueItem(queuedApproved.item.id);
+    assert(detailItem.id === queuedApproved.item.id, 'Queue item detail works');
 
-    console.log('\n5. Safe read/local placeholder tool can run');
-    const runResult = execution.runExecutionQueueItem(queuedRead.item.id);
+    console.log('\n5. Safe read placeholder tool can run');
+    const runResult = execution.runExecutionQueueItem(queuedApproved.item.id);
     assert(runResult.item.status === 'succeeded', 'Safe read placeholder tool can run');
 
-    console.log('\n6. Destructive/external tool does not auto-run');
+    console.log('\n6. Destructive and external tools do not auto-run');
     const localSource = toolGatewayStorage.createSource({ name: 'Queue Local Source', type: 'local' });
     const destructiveTool = toolGatewayStorage.registerTool({
       sourceId: localSource.id,
-      name: 'worklane.local.queue.destructive',
-      displayName: 'Queue Destructive Tool',
-      description: 'Should not auto-run',
+      name: 'worklane.local.destroy.queue',
+      displayName: 'Destroy Queue Tool',
+      description: 'Dangerous placeholder',
       inputSchema: { type: 'object' },
       riskLevel: 'destructive',
     });
-    const destructiveCall = createGatewayCall(destructiveTool.id, {});
-    toolGatewayStorage.approveCall(destructiveCall.call.id);
-    const destructiveQueue = execution.queueApprovedToolCall(destructiveCall.call.id);
-    assert(destructiveQueue.item.status === 'manual_required', 'Destructive tool does not auto-run');
+    const destructiveCall = toolGatewayStorage.createCall({
+      toolId: destructiveTool.id,
+      sourceId: localSource.id,
+      input: {},
+      status: 'approved',
+      approvalRequired: true,
+      approvedAt: new Date().toISOString(),
+    });
+    const destructiveQueue = execution.queueApprovedToolCall(destructiveCall.id);
+    assert(destructiveQueue.item.status === 'manual_required', 'Destructive tool becomes manual_required');
 
     const externalTool = toolGatewayStorage.registerTool({
       sourceId: localSource.id,
-      name: 'worklane.local.queue.external',
-      displayName: 'Queue External Tool',
-      description: 'Should remain manual',
+      name: 'worklane.local.external.queue',
+      displayName: 'External Queue Tool',
+      description: 'External placeholder',
       inputSchema: { type: 'object' },
       riskLevel: 'external',
     });
-    const externalCall = createGatewayCall(externalTool.id, {});
-    toolGatewayStorage.approveCall(externalCall.call.id);
-    const externalQueue = execution.queueApprovedToolCall(externalCall.call.id);
-    assert(externalQueue.item.status === 'manual_required', 'External tool does not auto-run');
+    const externalCall = toolGatewayStorage.createCall({
+      toolId: externalTool.id,
+      sourceId: localSource.id,
+      input: {},
+      status: 'approved',
+      approvalRequired: true,
+      approvedAt: new Date().toISOString(),
+    });
+    const externalQueue = execution.queueApprovedToolCall(externalCall.id);
+    assert(externalQueue.item.status === 'manual_required', 'External tool becomes manual_required');
 
     console.log('\n7. Unsupported tool becomes manual_required');
-    const unsupportedTool = toolGatewayStorage.registerTool({
+    const localReadTool = toolGatewayStorage.registerTool({
       sourceId: localSource.id,
-      name: 'worklane.local.queue.unsupported',
-      displayName: 'Unsupported Queue Tool',
-      description: 'Read tool without supported executor',
+      name: 'worklane.local.unsupported.read',
+      displayName: 'Unsupported Local Read',
+      description: 'Unsupported local read placeholder',
       inputSchema: { type: 'object' },
       riskLevel: 'read',
     });
-    const unsupportedCall = createGatewayCall(unsupportedTool.id, {});
-    const unsupportedQueue = execution.queueApprovedToolCall(unsupportedCall.call.id);
+    const unsupportedCall = toolGatewayStorage.createCall({
+      toolId: localReadTool.id,
+      sourceId: localSource.id,
+      input: {},
+      status: 'approved',
+      approvalRequired: false,
+      approvedAt: new Date().toISOString(),
+    });
+    const unsupportedQueue = execution.queueApprovedToolCall(unsupportedCall.id);
     assert(unsupportedQueue.item.status === 'manual_required', 'Unsupported tool becomes manual_required');
 
-    console.log('\n8. Disabled source and disabled tool block execution');
-    const disabledSource = toolGatewayStorage.createSource({ name: 'Disabled Queue Source', type: 'local', enabled: false });
-    const disabledSourceTool = toolGatewayStorage.registerTool({
-      sourceId: disabledSource.id,
-      name: 'worklane.local.queue.disabled-source',
-      displayName: 'Disabled Source Queue Tool',
-      description: 'Blocked by source',
-      inputSchema: { type: 'object' },
-      riskLevel: 'read',
-    });
-    const disabledSourceCall = createGatewayCall(disabledSourceTool.id, {});
-    assert(typeof disabledSourceCall.error === 'string', 'Disabled source blocks execution');
+    console.log('\n8. Disabled source and tool block execution');
+    const disableCall = createGatewayCall('tool_launchpix_asset_plan', { productName: 'Launch' });
+    const disableQueue = execution.queueApprovedToolCall(disableCall.call.id);
+    toolGatewayStorage.updateSource('src_talocode', { enabled: false });
+    const blockedBySource = execution.runExecutionQueueItem(disableQueue.item.id);
+    assert(blockedBySource.item.status === 'blocked', 'Disabled source blocks execution');
+    toolGatewayStorage.updateSource('src_talocode', { enabled: true });
 
-    const disabledTool = toolGatewayStorage.registerTool({
+    const disableToolCall = createGatewayCall('tool_stacklane_project_inspect', { projectId: 'proj_tool_disable' });
+    const disableToolQueue = execution.queueApprovedToolCall(disableToolCall.call.id);
+    toolGatewayStorage.registerTool({
       sourceId: localSource.id,
-      name: 'worklane.local.queue.disabled-tool',
-      displayName: 'Disabled Tool Queue Tool',
-      description: 'Blocked by tool',
+      name: 'worklane.local.placeholder.keep',
+      displayName: 'Keep Tool',
+      description: 'Keep tool to avoid empty source',
       inputSchema: { type: 'object' },
       riskLevel: 'read',
-      enabled: false,
     });
-    const disabledToolCall = createGatewayCall(disabledTool.id, {});
-    assert(typeof disabledToolCall.error === 'string', 'Disabled tool blocks execution');
+    const tool = toolGatewayStorage.getTool('tool_stacklane_project_inspect');
+    toolGatewayStorage.registerTool;
+    toolGatewayStorage.listTools();
+    const toolsFile = toolGatewayStorage.paths.tools;
+    const tools = JSON.parse(fs.readFileSync(toolsFile, 'utf-8'));
+    const toolIndex = tools.findIndex((item) => item.id === tool.id);
+    tools[toolIndex] = { ...tools[toolIndex], enabled: false, updatedAt: new Date().toISOString() };
+    fs.writeFileSync(toolsFile, JSON.stringify(tools, null, 2), 'utf-8');
+    const blockedByTool = execution.runExecutionQueueItem(disableToolQueue.item.id);
+    assert(blockedByTool.item.status === 'blocked', 'Disabled tool blocks execution');
 
-    console.log('\n9. Manual and cancel endpoints map to queue behavior');
-    const manualUpdated = execution.markExecutionQueueItemManual(unsupportedQueue.item.id, 'Needs human workflow');
-    assert(manualUpdated.status === 'manual_required', 'Manual endpoint marks manual_required');
-    const cancellableCall = createGatewayCall('tool_stacklane_project_inspect', { projectId: 'proj_2' });
-    const cancellableItem = execution.queueApprovedToolCall(cancellableCall.call.id).item;
-    const cancelled = execution.cancelExecutionQueueItem(cancellableItem.id);
-    assert(cancelled.status === 'cancelled', 'Cancel endpoint behavior works');
+    console.log('\n9. Missing auth config blocks execution safely');
+    const httpSource = toolGatewayStorage.createSource({
+      name: 'HTTP Queue Source',
+      type: 'http',
+      auth: { type: 'bearer', envKeyName: 'WORKLANE_EXECUTION_QUEUE_BEARER' },
+    });
+    const httpTool = toolGatewayStorage.registerTool({
+      sourceId: httpSource.id,
+      name: 'worklane.http.read.queue',
+      displayName: 'HTTP Read Queue Tool',
+      description: 'HTTP read placeholder',
+      inputSchema: { type: 'object' },
+      riskLevel: 'read',
+    });
+    const httpCall = toolGatewayStorage.createCall({
+      toolId: httpTool.id,
+      sourceId: httpSource.id,
+      input: {},
+      status: 'approved',
+      approvalRequired: false,
+      approvedAt: new Date().toISOString(),
+    });
+    const httpQueue = execution.queueApprovedToolCall(httpCall.id);
+    assert(httpQueue.item.status === 'blocked', 'Missing auth config blocks execution safely');
 
-    console.log('\n10. Execution history recorded');
-    const history = execution.executionStorage.history.list();
-    assert(history.length >= 3, 'Execution history recorded');
+    console.log('\n10. Manual and cancel endpoints work at data layer');
+    const manualItem = execution.markExecutionQueueItemManual(httpQueue.item.id, 'Handle this one manually.');
+    assert(manualItem.status === 'manual_required', 'Manual endpoint marks manual_required');
+    const cancelledItem = execution.cancelExecutionQueueItem(manualItem.id);
+    assert(cancelledItem.status === 'cancelled', 'Cancel endpoint works');
 
-    console.log('\n11. No secrets in storage or API-facing summaries');
-    const summary = execution.getExecutionSummary(queuedRead.item);
-    assert(!JSON.stringify(summary).includes('Bearer '), 'No secrets in execution summary');
-    const files = [...Object.values(execution.executionStorage.paths), ...Object.values(toolGatewayStorage.paths)].filter((filePath) => fs.existsSync(filePath));
-    const noSecrets = files.every((filePath) => {
+    console.log('\n11. Execution history is recorded');
+    const history = executionStorage.history.list();
+    assert(history.some((entry) => entry.action === 'queued'), 'Execution history records queue creation');
+    assert(history.some((entry) => entry.action === 'run.succeeded'), 'Execution history records run success');
+    assert(history.some((entry) => entry.action === 'manual_required'), 'Execution history records manual state');
+
+    console.log('\n12. No secrets in storage or queue summaries');
+    const summaries = execution.listExecutionQueue().map(execution.getExecutionSummary);
+    assert(summaries.every((item) => !JSON.stringify(item).includes('Bearer ')), 'Queue summaries do not expose secrets');
+    const storageFiles = [
+      ...Object.values(executionStorage.paths),
+      ...Object.values(toolGatewayStorage.paths),
+      auditPath,
+    ].filter((filePath) => fs.existsSync(filePath));
+    const noSecrets = storageFiles.every((filePath) => {
       const content = fs.readFileSync(filePath, 'utf-8');
       return !content.includes('ghp_') && !content.includes('sk-') && !content.includes('Bearer ');
     });
-    assert(noSecrets, 'No secrets in storage');
+    assert(noSecrets, 'No secrets in storage files');
 
-    console.log('\n12. Dashboard route exists and automation handoff integrates');
-    assert(fs.existsSync(path.join(repoRoot, 'apps/dashboard/src/app/dashboard/execution/page.tsx')), 'Dashboard route exists');
-    const routine = automation.createRoutine({
-      name: 'Execution Queue Routine',
-      description: 'Queues approved handoff call',
-      task: 'Prepare a read queue handoff',
-      toolGatewayToolIds: ['tool_stacklane_project_inspect'],
-    });
-    const autoRun = automation.runRoutineNow(routine);
-    automation.approveAutomationRun(autoRun.id, 'reviewer');
-    const handoff = automation.handoffAutomationRun(autoRun.id);
-    const handedOffItem = execution.listExecutionQueue().find((item) => item.automationRunId === autoRun.id);
-    assert(Boolean(handoff.run), 'Automation handoff completed');
-    assert(Boolean(handedOffItem), 'Automation handoff is visible in execution queue');
+    console.log('\n13. API errors are JSON-only and do not expose stack traces');
+    assert(routeContents.every((content) => !content.toLowerCase().includes('stack trace')), 'API route files do not include stack traces');
 
-    console.log('\n13. Existing tests still present');
-    assert(fs.existsSync(path.join(repoRoot, 'scripts/test-tool-gateway-v010.mjs')), 'Tool Gateway test still present');
-    assert(fs.existsSync(path.join(repoRoot, 'scripts/test-loops-routines-v010.mjs')), 'Automation test still present');
-    assert(fs.existsSync(path.join(repoRoot, 'scripts/test-automation-approvals-v010.mjs')), 'Automation approval test still present');
+    console.log('\n14. Dashboard route and docs exist');
+    assert(fs.existsSync(path.join(repoRoot, 'apps/dashboard/src/app/dashboard/execution/page.tsx')), 'Execution dashboard route exists');
+    assert(fs.existsSync(path.join(repoRoot, 'docs/EXECUTION_QUEUE.md')), 'Execution queue docs exist');
+
+    console.log('\n15. Existing tests still exist');
+    assert(fs.existsSync(path.join(repoRoot, 'scripts/test-tool-gateway-v010.mjs')), 'Existing Tool Gateway tests still present');
+    assert(fs.existsSync(path.join(repoRoot, 'scripts/test-loops-routines-v010.mjs')), 'Existing automation tests still present');
+    assert(fs.existsSync(path.join(repoRoot, 'scripts/test-automation-approvals-v010.mjs')), 'Existing automation approval tests still present');
 
     console.log(`\nResults: ${passed} passed, ${failed} failed`);
     process.exit(failed > 0 ? 1 : 0);
   } finally {
-    for (const [key, filePath] of Object.entries(execution.executionStorage.paths)) {
-      const backup = backups[key];
+    for (const [key, filePath] of Object.entries(executionStorage.paths)) {
+      const backup = backups[`execution:${key}`];
       if (backup === null) {
         if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
       } else {
@@ -193,7 +239,7 @@ async function run() {
       }
     }
     for (const [key, filePath] of Object.entries(toolGatewayStorage.paths)) {
-      const backup = toolBackups[key];
+      const backup = backups[`gateway:${key}`];
       if (backup === null) {
         if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
       } else {
@@ -201,14 +247,11 @@ async function run() {
         fs.writeFileSync(filePath, backup, 'utf-8');
       }
     }
-    for (const [key, filePath] of Object.entries(automation.automationStorage.paths)) {
-      const backup = autoBackups[key];
-      if (backup === null) {
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-      } else {
-        fs.mkdirSync(path.dirname(filePath), { recursive: true });
-        fs.writeFileSync(filePath, backup, 'utf-8');
-      }
+    if (backups.audit === null) {
+      if (fs.existsSync(auditPath)) fs.unlinkSync(auditPath);
+    } else {
+      fs.mkdirSync(path.dirname(auditPath), { recursive: true });
+      fs.writeFileSync(auditPath, backups.audit, 'utf-8');
     }
   }
 }

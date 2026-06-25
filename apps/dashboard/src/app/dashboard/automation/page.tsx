@@ -49,6 +49,9 @@ export default function AutomationPage() {
       <div style={{ padding: '8px 12px', background: '#1a1a2e', border: '1px solid #2a2a3a', borderRadius: 6, marginBottom: 24, fontSize: 13, color: '#93c5fd' }}>
         v0.1: local-first automation. Server must be running. Every run remains approval-first.
       </div>
+      <p style={{ marginTop: 0, marginBottom: 20, fontSize: 13, color: '#94a3b8' }}>
+        Approved automation handoffs become visible in <a href="/dashboard/execution" style={{ color: '#93c5fd' }}>Execution Queue</a> before any safe supported execution step.
+      </p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
         <section style={panel}>
           <h2 style={heading}>Pending Approval Runs</h2>

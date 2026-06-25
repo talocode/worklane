@@ -1,0 +1,8 @@
+{
+  "name": "ClipLoop Weekly Promo Draft",
+  "description": "Prepare a draft-only weekly promo planning routine.",
+  "task": "Create a weekly promo planning draft for ClipLoop with approval required before any follow-up tool call.",
+  "triggerType": "manual",
+  "toolGatewayToolIds": ["tool_cliploop_director_plan"],
+  "permissionProfile": "approval_required"
+}

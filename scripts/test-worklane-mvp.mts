@@ -25,11 +25,7 @@ function assert(condition, label) {
 
 function cleanup() {
   if (fs.existsSync(DATA_DIR)) {
-    const files = fs.readdirSync(DATA_DIR);
-    for (const f of files) {
-      fs.unlinkSync(path.join(DATA_DIR, f));
-    }
-    fs.rmdirSync(DATA_DIR);
+    fs.rmSync(DATA_DIR, { recursive: true, force: true });
   }
 }
 
@@ -148,8 +144,9 @@ storage.audit.create({
 });
 const events = storage.audit.list();
 assert(events.length >= 1, 'At least 1 audit event exists');
-assert(events[0].action === 'agent.created', 'Audit event action preserved');
-assert(events[0].timestamp !== undefined, 'Audit event has timestamp');
+const agentCreatedEvent = events.find((event) => event.action === 'agent.created');
+assert(agentCreatedEvent !== undefined, 'Audit event action preserved');
+assert(agentCreatedEvent?.timestamp !== undefined, 'Audit event has timestamp');
 
 // Test 10: No plaintext secret stored
 console.log('\n10. No Plaintext Secrets');

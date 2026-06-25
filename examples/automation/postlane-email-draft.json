@@ -1,0 +1,8 @@
+{
+  "name": "Postlane Email Draft Routine",
+  "description": "Prepare a repeatable approval-first email drafting routine.",
+  "task": "Draft a campaign email and require approval before any manual sending step.",
+  "triggerType": "manual",
+  "toolGatewayToolIds": ["tool_postlane_email_draft"],
+  "permissionProfile": "approval_required"
+}

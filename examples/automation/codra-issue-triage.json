@@ -1,0 +1,8 @@
+{
+  "name": "Codra Issue Triage Draft",
+  "description": "Prepare a triage draft for incoming issue review.",
+  "task": "Draft an issue triage summary and keep the result in approval-first mode.",
+  "triggerType": "api",
+  "toolGatewayToolIds": ["tool_worklane_run_create"],
+  "permissionProfile": "approval_required"
+}

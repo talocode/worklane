@@ -78,10 +78,10 @@ Local JSON Storage (.worklane/*.json)
 - Audit logging
 - Tool Gateway with normalized source and tool records
 - Loops and routines with local scheduler foundations
+- Execution Queue review layer
 - Dashboard UI
- - Execution Queue review layer
- - Local JSON storage
- - Simulated execution
+- Local JSON storage
+- Simulated execution
 
 ## What's Planned
 

@@ -7,7 +7,7 @@ export default function ToolGatewayPage() {
   const [tools, setTools] = useState<any[]>([]);
   const [calls, setCalls] = useState<any[]>([]);
 
-  useEffect(() => {
+  const load = () => {
     Promise.all([
       fetch('/api/tool-gateway/sources').then((response) => response.json()),
       fetch('/api/tool-gateway/tools').then((response) => response.json()),
@@ -17,7 +17,16 @@ export default function ToolGatewayPage() {
       setTools(toolsData.tools || []);
       setCalls(callsData.calls || []);
     });
+  };
+
+  useEffect(() => {
+    load();
   }, []);
+
+  const queueCall = async (id: string) => {
+    await fetch(`/api/tool-gateway/calls/${id}/queue`, { method: 'POST' });
+    load();
+  };
 
   return (
     <div style={{ padding: '32px 40px', maxWidth: 1100 }}>
@@ -55,7 +64,11 @@ export default function ToolGatewayPage() {
           <div key={call.id} style={listItem}>
             <div style={{ fontWeight: 500 }}>{call.toolId}</div>
             <div style={copy}>{call.status} · approval {call.approvalRequired ? 'required' : 'not required'}</div>
-            {call.status === 'approved' && <div style={copy}>Queue this call from the Execution Queue workflow if it is ready for review.</div>}
+            {call.status === 'approved' && (
+              <div style={{ marginTop: 10 }}>
+                <button onClick={() => queueCall(call.id)} style={buttonStyle}>Queue</button>
+              </div>
+            )}
           </div>
         ))}
       </section>
@@ -67,3 +80,4 @@ const panel: React.CSSProperties = { padding: '20px 24px', background: '#16161e'
 const listItem: React.CSSProperties = { padding: '12px 0', borderBottom: '1px solid #252535' };
 const heading: React.CSSProperties = { fontSize: 16, fontWeight: 600, marginTop: 0, marginBottom: 12 };
 const copy: React.CSSProperties = { fontSize: 13, color: '#94a3b8', marginTop: 4 };
+const buttonStyle: React.CSSProperties = { padding: '6px 12px', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13, background: '#2563eb' };

@@ -144,17 +144,7 @@ async function run() {
 
     const disableToolCall = createGatewayCall('tool_stacklane_project_inspect', { projectId: 'proj_tool_disable' });
     const disableToolQueue = execution.queueApprovedToolCall(disableToolCall.call.id);
-    toolGatewayStorage.registerTool({
-      sourceId: localSource.id,
-      name: 'worklane.local.placeholder.keep',
-      displayName: 'Keep Tool',
-      description: 'Keep tool to avoid empty source',
-      inputSchema: { type: 'object' },
-      riskLevel: 'read',
-    });
     const tool = toolGatewayStorage.getTool('tool_stacklane_project_inspect');
-    toolGatewayStorage.registerTool;
-    toolGatewayStorage.listTools();
     const toolsFile = toolGatewayStorage.paths.tools;
     const tools = JSON.parse(fs.readFileSync(toolsFile, 'utf-8'));
     const toolIndex = tools.findIndex((item) => item.id === tool.id);

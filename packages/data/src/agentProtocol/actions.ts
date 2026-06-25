@@ -1,0 +1,135 @@
+import type { AgentActionDefinition, RiskLevel } from './types';
+
+/**
+ * WorkLane GitHub tool actions mapped to Agent-Native Protocol.
+ */
+
+export const WORKLANE_ACTIONS: AgentActionDefinition[] = [
+  {
+    id: 'github.create_issue',
+    product: 'worklane',
+    type: 'github.create_issue',
+    title: 'Create GitHub Issue',
+    description: 'Create a new issue in a GitHub repository',
+    inputSchema: {
+      type: 'object',
+      required: ['owner', 'repo', 'title'],
+      properties: {
+        owner: { type: 'string', description: 'GitHub owner or organization' },
+        repo: { type: 'string', description: 'Repository name' },
+        title: { type: 'string', description: 'Issue title' },
+        body: { type: 'string', description: 'Issue body text' },
+        labels: { type: 'array', items: { type: 'string' } },
+      },
+    },
+    riskLevel: 'medium',
+    readOnly: false,
+    requiresApproval: true,
+    requiredPermissions: ['github:write'],
+  },
+  {
+    id: 'github.create_comment',
+    product: 'worklane',
+    type: 'github.create_comment',
+    title: 'Comment on GitHub Issue',
+    description: 'Add a comment to an existing GitHub issue',
+    inputSchema: {
+      type: 'object',
+      required: ['owner', 'repo', 'issueNumber', 'body'],
+      properties: {
+        owner: { type: 'string' },
+        repo: { type: 'string' },
+        issueNumber: { type: 'number' },
+        body: { type: 'string' },
+      },
+    },
+    riskLevel: 'low',
+    readOnly: false,
+    requiresApproval: true,
+    requiredPermissions: ['github:write'],
+  },
+  {
+    id: 'github.list_issues',
+    product: 'worklane',
+    type: 'github.list_issues',
+    title: 'List GitHub Issues',
+    description: 'List issues in a GitHub repository',
+    inputSchema: {
+      type: 'object',
+      required: ['owner', 'repo'],
+      properties: {
+        owner: { type: 'string' },
+        repo: { type: 'string' },
+        state: { type: 'string', enum: ['open', 'closed', 'all'] },
+        limit: { type: 'number' },
+      },
+    },
+    riskLevel: 'read',
+    readOnly: true,
+    requiresApproval: false,
+    requiredPermissions: ['github:read'],
+  },
+  {
+    id: 'github.get_issue',
+    product: 'worklane',
+    type: 'github.get_issue',
+    title: 'Get GitHub Issue',
+    description: 'Get details of a specific GitHub issue',
+    inputSchema: {
+      type: 'object',
+      required: ['owner', 'repo', 'issueNumber'],
+      properties: {
+        owner: { type: 'string' },
+        repo: { type: 'string' },
+        issueNumber: { type: 'number' },
+      },
+    },
+    riskLevel: 'read',
+    readOnly: true,
+    requiresApproval: false,
+    requiredPermissions: ['github:read'],
+  },
+  {
+    id: 'github.list_issue_comments',
+    product: 'worklane',
+    type: 'github.list_issue_comments',
+    title: 'List Issue Comments',
+    description: 'List comments on a GitHub issue',
+    inputSchema: {
+      type: 'object',
+      required: ['owner', 'repo', 'issueNumber'],
+      properties: {
+        owner: { type: 'string' },
+        repo: { type: 'string' },
+        issueNumber: { type: 'number' },
+        limit: { type: 'number' },
+      },
+    },
+    riskLevel: 'read',
+    readOnly: true,
+    requiresApproval: false,
+    requiredPermissions: ['github:read'],
+  },
+  {
+    id: 'github.search_issues',
+    product: 'worklane',
+    type: 'github.search_issues',
+    title: 'Search GitHub Issues',
+    description: 'Search issues across GitHub repositories',
+    inputSchema: {
+      type: 'object',
+      required: ['query'],
+      properties: {
+        query: { type: 'string' },
+        owner: { type: 'string' },
+        repo: { type: 'string' },
+        state: { type: 'string' },
+        limit: { type: 'number' },
+      },
+    },
+    riskLevel: 'read',
+    readOnly: true,
+    requiresApproval: false,
+    requiredPermissions: ['github:read'],
+  },
+];

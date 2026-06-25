@@ -1,0 +1,8 @@
+{
+  "name": "Stacklane Health Check",
+  "description": "Create a draft inspection loop for a project health check.",
+  "task": "Inspect a Stacklane project summary and prepare a local-only health draft.",
+  "intervalMinutes": 30,
+  "toolGatewayToolIds": ["tool_stacklane_project_inspect"],
+  "permissionProfile": "approval_required"
+}

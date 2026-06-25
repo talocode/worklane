@@ -7,8 +7,8 @@ interface Stats {
   knowledge: number;
   connections: number;
   pendingRuns: number;
-  harnessRuns: number;
   tools: number;
+  automationRuns: number;
   recentRuns: { id: string; task: string; status: string; createdAt: string }[];
   recentAudit: { id: string; action: string; actorType: string; timestamp: string }[];
 }
@@ -22,18 +22,18 @@ export default function Dashboard() {
       fetch('/api/knowledge').then(r => r.json()),
       fetch('/api/connections').then(r => r.json()),
       fetch('/api/runs').then(r => r.json()),
-      fetch('/api/harness/runs').then(r => r.json()),
       fetch('/api/tool-gateway/tools').then(r => r.json()),
+      fetch('/api/automation/runs').then(r => r.json()),
       fetch('/api/audit?limit=5').then(r => r.json()),
-    ]).then(([agents, knowledge, connections, runs, harness, tools, audit]) => {
+    ]).then(([agents, knowledge, connections, runs, tools, automationRuns, audit]) => {
       const pendingRuns = (runs.runs || []).filter((r: any) => r.status === 'pending_approval');
       setStats({
         agents: (agents.agents || []).length,
         knowledge: (knowledge.knowledge || []).length,
         connections: (connections.connections || []).length,
         pendingRuns: pendingRuns.length,
-        harnessRuns: (harness.runs || []).length,
         tools: (tools.tools || []).length,
+        automationRuns: (automationRuns.runs || []).length,
         recentRuns: (runs.runs || []).slice(-5).reverse(),
         recentAudit: (audit.events || []).slice(-5).reverse(),
       });
@@ -52,8 +52,8 @@ export default function Dashboard() {
           { label: 'Knowledge', value: stats.knowledge, href: '/dashboard/knowledge' },
           { label: 'Connections', value: stats.connections, href: '/dashboard/connections' },
           { label: 'Pending Approvals', value: stats.pendingRuns, href: '/dashboard/runs' },
-          { label: 'Harness Runs', value: stats.harnessRuns, href: '/dashboard/harness' },
           { label: 'Tools', value: stats.tools, href: '/dashboard/tool-gateway' },
+          { label: 'Automation Runs', value: stats.automationRuns, href: '/dashboard/automation' },
         ].map(s => (
           <a key={s.label} href={s.href} style={{ ...statCard, textDecoration: 'none' }}>
             <div style={{ fontSize: 28, fontWeight: 700 }}>{s.value}</div>

@@ -234,3 +234,87 @@ Approve a pending tool call.
 > ✅ Implemented
 
 Execute a deterministic placeholder handler or return a safe not-connected result.
+
+---
+
+## Loops & Routines
+
+### GET /api/automation/health
+> ✅ Implemented
+
+Return local automation health and loop constraints.
+
+### POST /api/automation/loops
+> ✅ Implemented
+
+Create a loop.
+
+### GET /api/automation/loops
+> ✅ Implemented
+
+List loops.
+
+### GET /api/automation/loops/:id
+> ✅ Implemented
+
+Get one loop.
+
+### POST /api/automation/loops/:id/pause
+> ✅ Implemented
+
+Pause a loop.
+
+### POST /api/automation/loops/:id/resume
+> ✅ Implemented
+
+Resume a loop.
+
+### POST /api/automation/loops/:id/cancel
+> ✅ Implemented
+
+Cancel a loop.
+
+### POST /api/automation/routines
+> ✅ Implemented
+
+Create a routine.
+
+### GET /api/automation/routines
+> ✅ Implemented
+
+List routines.
+
+### GET /api/automation/routines/:id
+> ✅ Implemented
+
+Get one routine.
+
+### POST /api/automation/routines/:id/run
+> ✅ Implemented
+
+Create a manual routine run in pending approval state.
+
+### POST /api/automation/routines/:id/pause
+> ✅ Implemented
+
+Pause a routine.
+
+### POST /api/automation/routines/:id/resume
+> ✅ Implemented
+
+Resume a routine.
+
+### POST /api/automation/routines/:id/archive
+> ✅ Implemented
+
+Archive a routine.
+
+### GET /api/automation/runs
+> ✅ Implemented
+
+List automation runs. A scheduler tick may create new pending approval runs while the server is active.
+
+### GET /api/automation/runs/:id
+> ✅ Implemented
+
+Get one automation run.

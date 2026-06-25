@@ -4,6 +4,8 @@ WorkLane Tool Gateway provides a provider-agnostic tool registry and execution g
 
 It lets builders configure tool sources once, normalize them into a common schema, apply approval-first permissions, and use them safely from WorkLane runs and future clients.
 
+In v0.1, Loops & Routines can reference Tool Gateway tool ids, but automation still creates approval-first run records instead of directly executing external actions.
+
 ## What it is
 
 Tool Gateway adds one normalized interface for:

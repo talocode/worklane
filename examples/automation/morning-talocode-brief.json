@@ -1,0 +1,12 @@
+{
+  "name": "Morning Talocode Brief",
+  "description": "Draft a local-first morning brief for the Talocode workspace.",
+  "task": "Prepare a morning summary draft of open work and pending approvals.",
+  "triggerType": "schedule",
+  "toolGatewayToolIds": ["tool_worklane_run_create"],
+  "permissionProfile": "approval_required",
+  "schedule": {
+    "intervalMinutes": 60,
+    "nextRunAt": "2026-06-25T08:00:00.000Z"
+  }
+}

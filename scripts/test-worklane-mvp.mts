@@ -25,11 +25,7 @@ function assert(condition, label) {
 
 function cleanup() {
   if (fs.existsSync(DATA_DIR)) {
-    const files = fs.readdirSync(DATA_DIR);
-    for (const f of files) {
-      fs.unlinkSync(path.join(DATA_DIR, f));
-    }
-    fs.rmdirSync(DATA_DIR);
+    fs.rmSync(DATA_DIR, { recursive: true, force: true });
   }
 }
 

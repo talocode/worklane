@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { storage } from '../../../../../../packages/data/src/storage';
+import { storage } from '../../../../../../../packages/data/src/storage';
 import { ok, badRequest, notFound } from '../../../lib/api/response';
 import { checkAuth } from '../../../lib/api/auth';
 

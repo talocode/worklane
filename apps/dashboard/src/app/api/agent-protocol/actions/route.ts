@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { WORKLANE_ACTIONS } from "../../../../../../packages/data/src/agentProtocol";
+import { WORKLANE_ACTIONS } from "../../../../../../../packages/data/src/agentProtocol";
 
 export async function GET() {
   return NextResponse.json({

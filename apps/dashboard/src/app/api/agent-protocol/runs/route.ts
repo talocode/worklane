@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { resolveProtocolAction, validateProtocolActionInput, createProtocolRun } from "../../../../../../packages/data/src/agentProtocol";
+import { resolveProtocolAction, validateProtocolActionInput, createProtocolRun } from "../../../../../../../packages/data/src/agentProtocol";
 
 const protocolRuns: Map<string, any> = new Map();
 

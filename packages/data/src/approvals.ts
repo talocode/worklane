@@ -1,4 +1,4 @@
-import type { TaskRun, AuditEvent } from '../types';
+import type { TaskRun, AuditEvent } from './types';
 
 type RunStatus = TaskRun['status'];
 

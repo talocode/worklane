@@ -41,12 +41,15 @@ function deriveQueueState(callId: string): { item?: ExecutionQueueItem; error?: 
   if (call.status !== 'approved') {
     status = 'blocked';
     manualReason = call.status === 'pending_approval' ? 'Tool call still requires Tool Gateway approval.' : 'Tool call is not approved for execution.';
+  } else if (source.enabled === false) {
+    status = 'blocked';
+    manualReason = 'Source is disabled.';
+  } else if (tool.enabled === false) {
+    status = 'blocked';
+    manualReason = 'Tool is disabled.';
   } else if (tool.riskLevel === 'destructive' || tool.riskLevel === 'external') {
     status = 'manual_required';
     manualReason = 'This tool risk level must not auto-run in v0.1.';
-  } else if (source.enabled === false || tool.enabled === false) {
-    status = 'blocked';
-    manualReason = 'Source or tool is disabled.';
   } else if (sourceConfigSignal(source) === 'missing_env' && source.type !== 'talocode' && source.type !== 'local') {
     status = 'blocked';
     manualReason = 'Required auth configuration is missing.';

@@ -49,6 +49,8 @@ export interface TaskStep {
   order: number;
   description: string;
   tool?: string;
+  toolAction?: string;
+  toolInput?: Record<string, unknown>;
   status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
   result?: string;
   error?: string;
@@ -64,6 +66,8 @@ export interface TaskRun {
   riskLevel: 'low' | 'medium' | 'high';
   plan: TaskStep[];
   approvalStatus: 'pending' | 'approved' | 'rejected';
+  toolAction?: string;
+  toolInput?: Record<string, unknown>;
   result?: string;
   error?: string;
   createdBy: string;

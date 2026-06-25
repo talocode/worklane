@@ -151,6 +151,64 @@ Approve a task run.
 
 Cancel a task run.
 
+### POST /api/runs/:id/execute
+> ✅ Implemented
+
+Execute an approved task run. Runs tool actions if configured.
+
+**Response (real execution):**
+```json
+{
+  "ok": true,
+  "run": { "..." },
+  "execution": {
+    "mode": "real",
+    "provider": "github",
+    "action": "github.create_issue",
+    "result": {
+      "issueNumber": 12,
+      "title": "Fix login bug",
+      "url": "https://github.com/talocode/worklane/issues/12"
+    }
+  }
+}
+```
+
+**Response (simulated execution):**
+```json
+{
+  "ok": true,
+  "run": { "..." },
+  "execution": { "mode": "simulated" }
+}
+```
+
+---
+
+## Tools
+
+### GET /api/tools
+> ✅ Implemented
+
+List available tool actions.
+
+**Response:**
+```json
+{
+  "ok": true,
+  "actions": [
+    {
+      "id": "github.create_issue",
+      "provider": "github",
+      "name": "Create GitHub Issue",
+      "description": "Create a new issue in a GitHub repository",
+      "riskLevel": "medium",
+      "requiresApproval": true
+    }
+  ]
+}
+```
+
 ---
 
 ## Triggers

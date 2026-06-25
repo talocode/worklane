@@ -12,6 +12,22 @@ export {
   PROTOCOL_ERRORS,
   protocolError,
 } from './agentProtocol';
+export {
+  TOOL_REGISTRY,
+  getToolAction,
+  listToolActions,
+  isReadOnlyAction,
+  createGitHubIssue,
+  createGitHubComment,
+  listGitHubIssues,
+  getGitHubIssue,
+  listGitHubIssueComments,
+  searchGitHubIssues,
+  executeToolAction,
+} from './tools';
+export * as automation from './automation';
+export * as execution from './execution';
+export * as toolGateway from './tool-gateway';
 export type {
   Workspace,
   Agent,
@@ -34,3 +50,24 @@ export type {
   AgentAuditEvent,
   ProtocolManifest,
 } from './agentProtocol/types';
+export type {
+  ToolProvider,
+  ToolActionType,
+  ToolActionDefinition,
+  GitHubCreateIssueInput,
+  GitHubCreateIssueResult,
+  GitHubCreateCommentInput,
+  GitHubCreateCommentResult,
+  GitHubListIssuesInput,
+  GitHubListIssuesResult,
+  GitHubIssueSummary,
+  GitHubGetIssueInput,
+  GitHubGetIssueResult,
+  GitHubListIssueCommentsInput,
+  GitHubListIssueCommentsResult,
+  GitHubIssueCommentSummary,
+  GitHubSearchIssuesInput,
+  GitHubSearchIssuesResult,
+  GitHubSearchIssueSummary,
+  ToolExecutionResult,
+} from './tools/types';

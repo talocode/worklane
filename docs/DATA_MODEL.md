@@ -165,3 +165,39 @@ interface SecretReference {
   createdAt: string;
 }
 ```
+
+### ToolActionDefinition
+```typescript
+interface ToolActionDefinition {
+  id: string;                    // e.g. "github.create_issue"
+  provider: 'github';
+  type: string;                  // e.g. "github.create_issue"
+  name: string;                  // e.g. "Create GitHub Issue"
+  description: string;
+  riskLevel: 'low' | 'medium' | 'high';
+  requiresApproval: true;
+  requiredConnectionType: string;
+  inputSchema: Record<string, unknown>;
+}
+```
+
+### TaskRun (with tool action)
+```typescript
+// TaskRun now includes optional tool action fields:
+interface TaskRun {
+  // ... existing fields ...
+  toolAction?: string;               // e.g. "github.create_issue"
+  toolInput?: Record<string, unknown>; // action-specific input
+  executionMode: 'simulated' | 'live';
+}
+```
+
+### TaskStep (with tool action)
+```typescript
+// TaskStep now includes optional tool action fields:
+interface TaskStep {
+  // ... existing fields ...
+  toolAction?: string;
+  toolInput?: Record<string, unknown>;
+}
+```

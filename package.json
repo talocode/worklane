@@ -21,6 +21,7 @@
     "dev": "npm run dev --workspaces",
     "test:tool-gateway": "npx tsx scripts/test-tool-gateway-v010.mjs",
     "test:automation": "npx tsx scripts/test-loops-routines-v010.mjs"
+    ,"test:execution":"npx tsx scripts/test-execution-queue-v010.mjs"
   },
   "keywords": [
     "ai",

@@ -343,3 +343,47 @@ Mark an automation run rejected with optional reason.
 > ✅ Implemented
 
 Hand an approved automation run off to Tool Gateway or mark manual handoff required.
+
+---
+
+## Execution Queue
+
+### GET /api/execution/health
+> ✅ Implemented
+
+Return execution queue status and storage paths.
+
+### GET /api/execution/queue
+> ✅ Implemented
+
+List queue items across ready, blocked, manual, running, and completed states.
+
+### GET /api/execution/queue/:id
+> ✅ Implemented
+
+Get one queue item.
+
+### POST /api/execution/queue/:id/run
+> ✅ Implemented
+
+Run a queue item only when safe.
+
+### POST /api/execution/queue/:id/manual
+> ✅ Implemented
+
+Mark an item as manual required.
+
+### POST /api/execution/queue/:id/cancel
+> ✅ Implemented
+
+Cancel a queued or reviewable item.
+
+### GET /api/execution/history
+> ✅ Implemented
+
+List execution queue history.
+
+### POST /api/tool-gateway/calls/:id/queue
+> ✅ Implemented
+
+Queue an approved Tool Gateway call for execution review.

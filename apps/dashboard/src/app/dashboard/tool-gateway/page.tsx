@@ -25,6 +25,9 @@ export default function ToolGatewayPage() {
       <div style={{ padding: '8px 12px', background: '#1a1a2e', border: '1px solid #2a2a3a', borderRadius: 6, marginBottom: 24, fontSize: 13, color: '#93c5fd' }}>
         v0.1: provider-agnostic registry with approval-first deterministic execution.
       </div>
+      <p style={{ marginTop: 0, marginBottom: 20, fontSize: 13, color: '#94a3b8' }}>
+        Approved calls can be reviewed further in <a href="/dashboard/execution" style={{ color: '#93c5fd' }}>Execution Queue</a>.
+      </p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
         <section style={panel}>
           <h2 style={heading}>Sources</h2>
@@ -52,6 +55,7 @@ export default function ToolGatewayPage() {
           <div key={call.id} style={listItem}>
             <div style={{ fontWeight: 500 }}>{call.toolId}</div>
             <div style={copy}>{call.status} · approval {call.approvalRequired ? 'required' : 'not required'}</div>
+            {call.status === 'approved' && <div style={copy}>Queue this call from the Execution Queue workflow if it is ready for review.</div>}
           </div>
         ))}
       </section>

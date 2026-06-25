@@ -15,6 +15,7 @@ export default function Home() {
         <a href="/dashboard/runs" style={cardStyle}>Task Runs →</a>
         <a href="/dashboard/tool-gateway" style={cardStyle}>Tool Gateway →</a>
         <a href="/dashboard/automation" style={cardStyle}>Loops & Routines →</a>
+        <a href="/dashboard/execution" style={cardStyle}>Execution Queue →</a>
         <a href="/dashboard/audit" style={cardStyle}>Audit Log →</a>
       </div>
       <p style={{ marginTop: 40, fontSize: 12, color: '#555' }}>

@@ -8,6 +8,8 @@ In v0.1, Loops & Routines can reference Tool Gateway tool ids, but automation st
 
 Automation approvals can hand off approved runs into Tool Gateway call creation. That handoff still respects source enabled state, tool enabled state, auth configuration checks, and Tool Gateway approval rules.
 
+Approved Tool Gateway calls can then be moved into Execution Queue for visible review and safe placeholder execution when supported.
+
 ## What it is
 
 Tool Gateway adds one normalized interface for:

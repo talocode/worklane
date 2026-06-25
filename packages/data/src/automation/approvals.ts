@@ -1,4 +1,5 @@
 import { storage } from '../storage';
+import { ensureQueueItemForToolCall } from '../execution/queue';
 import { createGatewayCall } from '../tool-gateway/executor';
 import { getGatewayTool, listGatewaySources } from '../tool-gateway/registry';
 import { evaluateToolPermission } from '../tool-gateway/permissions';
@@ -131,6 +132,8 @@ export function handoffAutomationRun(id: string): { run?: AutomationRunRecord; m
     }
     const gatewayCall = createGatewayCall(toolId, {
       automationRunId: run.id,
+      loopId: run.sourceType === 'loop' ? run.sourceId : undefined,
+      routineId: run.sourceType === 'routine' ? run.sourceId : undefined,
       task: run.task,
       sourceType: run.sourceType,
     });
@@ -139,6 +142,7 @@ export function handoffAutomationRun(id: string): { run?: AutomationRunRecord; m
       continue;
     }
     createdCallIds.push(gatewayCall.call.id);
+    ensureQueueItemForToolCall(gatewayCall.call.id);
     if (gatewayCall.audit) {
       storage.audit.create(gatewayCall.audit);
     }

@@ -98,6 +98,7 @@ All responses are JSON-only.
 - v0.1 automation creates approval-first automation run records rather than directly executing external actions
 - approved automation runs can hand off into Tool Gateway call creation
 - destructive and external tool handoff still results in Tool Gateway approval-first calls
+- handed-off calls can appear in Execution Queue without auto-running
 
 ## Audit and History
 

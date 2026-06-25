@@ -1,6 +1,5 @@
 import { storage } from '../storage';
 import { getGatewayTool, listGatewaySources } from '../tool-gateway/registry';
-import { evaluateToolPermission } from '../tool-gateway/permissions';
 import { sourceConfigSignal } from '../tool-gateway/sources';
 import { toolGatewayStorage } from '../tool-gateway/storage';
 import { runGatewayCall } from '../tool-gateway/executor';
@@ -32,11 +31,9 @@ function deriveQueueState(callId: string): { item?: ExecutionQueueItem; error?: 
   const call = toolGatewayStorage.getCall(callId);
   if (!call) return { error: 'Tool call not found.' };
   const tool = getGatewayTool(call.toolId);
-  const source = tool ? listGatewaySources().find((entry) => entry.id === tool.sourceId) : undefined;
-  const permission = evaluateToolPermission(source, tool);
-  if (!tool || !source || !permission.allowed) {
-    return { error: permission.reason || 'Tool call is not allowed.' };
-  }
+  if (!tool) return { error: 'Tool not found.' };
+  const source = listGatewaySources().find((entry) => entry.id === tool.sourceId);
+  if (!source) return { error: 'Source not found.' };
 
   let status: ExecutionQueueStatus = 'blocked';
   let manualReason: string | undefined;
@@ -88,7 +85,15 @@ function refreshQueueItem(item: ExecutionQueueItem): { item?: ExecutionQueueItem
   }
 
   const derived = deriveQueueState(item.toolCallId);
-  if (derived.error || !derived.item) return { error: derived.error || 'Failed to refresh execution queue item.' };
+  if (derived.error || !derived.item) {
+    const blocked = executionStorage.queue.save({
+      ...item,
+      status: 'blocked',
+      manualReason: derived.error || 'Failed to refresh execution queue item.',
+      error: undefined,
+    });
+    return { item: blocked };
+  }
   const refreshed = executionStorage.queue.save({
     ...item,
     sourceId: derived.item.sourceId,

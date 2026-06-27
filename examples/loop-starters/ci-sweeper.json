@@ -1,0 +1,18 @@
+{
+  "starterId": "ci-sweeper",
+  "safeDefaultMode": "report_only",
+  "suggestedCadence": "every 4 hours",
+  "requiredApprovals": ["routine_save", "first_run", "ci_remediation"],
+  "finalReportTemplate": {
+    "summary": "CI sweep summary for recent failing checks.",
+    "repo": "owner/repo",
+    "starterId": "ci-sweeper",
+    "mode": "report_only",
+    "findings": [],
+    "recommendedNextSteps": ["Review failing checks", "Assign owners manually"],
+    "approvalStatus": "draft_only",
+    "failingCheckCount": 0,
+    "flakyCheckCount": 0,
+    "suggestedOwners": []
+  }
+}

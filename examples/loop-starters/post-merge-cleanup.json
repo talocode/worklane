@@ -1,0 +1,18 @@
+{
+  "starterId": "post-merge-cleanup",
+  "safeDefaultMode": "approval_required",
+  "suggestedCadence": "after merge events",
+  "requiredApprovals": ["routine_save", "first_run", "branch_cleanup", "deploy"],
+  "finalReportTemplate": {
+    "summary": "Post-merge cleanup plan for recent merges.",
+    "repo": "owner/repo",
+    "starterId": "post-merge-cleanup",
+    "mode": "approval_required",
+    "findings": [],
+    "recommendedNextSteps": ["Review cleanup tasks", "Approve branch hygiene manually"],
+    "approvalStatus": "pending",
+    "recentMergeCount": 0,
+    "cleanupTaskCount": 0,
+    "blockedCleanupItems": []
+  }
+}

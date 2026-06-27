@@ -16,6 +16,7 @@ WorkLane is a local-first command center where teams can create agents, share kn
 - **Task Runs** — Run agent tasks with approval gates and audit trails
 - **Tool Gateway** — Register approved tools once and expose them through one normalized interface
 - **Loops & Routines** — Turn repeatable work into local-first, approval-first automations
+- **Loop Starter Kits** — Reusable loop engineering patterns for triage, CI sweeps, PR babysitting, and more
 - **Automation Approvals** — Review pending automation runs before any handoff happens
 - **Execution Queue** — Review approved tool calls, run safe placeholders, or mark manual handoff
 - **Approval-First** — Destructive actions require explicit human approval
@@ -78,6 +79,7 @@ Local JSON Storage (.worklane/*.json)
 - Audit logging
 - Tool Gateway with normalized source and tool records
 - Loops and routines with local scheduler foundations
+- Loop starter kits with approval-first routine draft instantiation
 - Execution Queue review layer
 - Dashboard UI
 - Local JSON storage
@@ -103,6 +105,7 @@ Local JSON Storage (.worklane/*.json)
 - [Roadmap](docs/ROADMAP.md)
 - [Tool Gateway](docs/TOOL_GATEWAY.md)
 - [Loops & Routines](docs/LOOPS_AND_ROUTINES.md)
+- [Loop Starter Kits](docs/LOOP_STARTER_KITS.md)
 - [Execution Queue](docs/EXECUTION_QUEUE.md)
 
 ## Contributing

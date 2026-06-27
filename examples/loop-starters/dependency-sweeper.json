@@ -1,0 +1,18 @@
+{
+  "starterId": "dependency-sweeper",
+  "safeDefaultMode": "report_only",
+  "suggestedCadence": "weekly",
+  "requiredApprovals": ["routine_save", "first_run", "dependency_upgrade"],
+  "finalReportTemplate": {
+    "summary": "Dependency sweep report with upgrade recommendations.",
+    "repo": "owner/repo",
+    "starterId": "dependency-sweeper",
+    "mode": "report_only",
+    "findings": [],
+    "recommendedNextSteps": ["Review outdated packages", "Approve upgrade work manually"],
+    "approvalStatus": "draft_only",
+    "outdatedPackageCount": 0,
+    "highRiskFindings": [],
+    "recommendedUpgradeOrder": []
+  }
+}

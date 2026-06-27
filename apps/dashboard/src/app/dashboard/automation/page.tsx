@@ -50,6 +50,7 @@ export default function AutomationPage() {
         v0.1: local-first automation. Server must be running. Every run remains approval-first.
       </div>
       <p style={{ marginTop: 0, marginBottom: 20, fontSize: 13, color: '#94a3b8' }}>
+        Need a safe starting pattern? Browse <a href="/dashboard/loop-starters" style={{ color: '#93c5fd' }}>Loop Starter Kits</a>.
         Approved automation handoffs become visible in <a href="/dashboard/execution" style={{ color: '#93c5fd' }}>Execution Queue</a> before any safe supported execution step.
       </p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>

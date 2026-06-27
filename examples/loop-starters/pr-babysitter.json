@@ -1,0 +1,18 @@
+{
+  "starterId": "pr-babysitter",
+  "safeDefaultMode": "approval_required",
+  "suggestedCadence": "every 2 hours",
+  "requiredApprovals": ["routine_save", "first_run", "draft_comment", "merge_or_push"],
+  "finalReportTemplate": {
+    "summary": "Pull request babysitting notes for open review gaps.",
+    "repo": "owner/repo",
+    "starterId": "pr-babysitter",
+    "mode": "approval_required",
+    "findings": [],
+    "recommendedNextSteps": ["Review stale pull requests", "Approve comment drafts before posting"],
+    "approvalStatus": "pending",
+    "openPrCount": 0,
+    "stalePrCount": 0,
+    "reviewGapSummary": []
+  }
+}

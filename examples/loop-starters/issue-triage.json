@@ -1,0 +1,18 @@
+{
+  "starterId": "issue-triage",
+  "safeDefaultMode": "report_only",
+  "suggestedCadence": "daily",
+  "requiredApprovals": ["routine_save", "first_run", "issue_update"],
+  "finalReportTemplate": {
+    "summary": "Issue triage draft grouped by severity.",
+    "repo": "owner/repo",
+    "starterId": "issue-triage",
+    "mode": "report_only",
+    "findings": [],
+    "recommendedNextSteps": ["Review severity buckets", "Approve label or assignment changes"],
+    "approvalStatus": "draft_only",
+    "untriagedIssueCount": 0,
+    "severitySummary": {},
+    "suggestedOwners": []
+  }
+}

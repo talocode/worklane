@@ -448,6 +448,55 @@ Hand an approved automation run off to Tool Gateway or mark manual handoff requi
 
 ---
 
+## Loop Starter Kits
+
+### GET /api/loop-starters
+> ✅ Implemented
+
+List all loop starter kits.
+
+**Response:**
+```json
+{ "ok": true, "starters": [{ "id": "daily-triage", "name": "Daily Triage", "risk": "low" }] }
+```
+
+### GET /api/loop-starters/:id
+> ✅ Implemented
+
+Return one loop starter definition.
+
+### POST /api/loop-starters/:id/instantiate
+> ✅ Implemented
+
+Create a routine draft from a starter. Does not schedule or execute the routine.
+
+**Request:**
+```json
+{
+  "title": "Daily Triage — my-repo",
+  "repo": "owner/repo",
+  "cadence": "daily",
+  "toolIds": ["tool_worklane_run_create"],
+  "mode": "report_only",
+  "notes": "First dry run"
+}
+```
+
+**Response:**
+```json
+{
+  "ok": true,
+  "routineDraft": { "status": "draft", "approvalRequired": true },
+  "permissionProfile": "read_only",
+  "approvalRequired": true,
+  "requiredTools": ["tool_worklane_run_create"],
+  "verificationChecklist": [],
+  "warnings": []
+}
+```
+
+---
+
 ## Execution Queue
 
 ### GET /api/execution/health

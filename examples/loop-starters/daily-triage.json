@@ -1,0 +1,18 @@
+{
+  "starterId": "daily-triage",
+  "safeDefaultMode": "report_only",
+  "suggestedCadence": "daily",
+  "requiredApprovals": ["routine_save", "first_run", "any_write_follow_up"],
+  "finalReportTemplate": {
+    "summary": "Daily triage summary for the target repository.",
+    "repo": "owner/repo",
+    "starterId": "daily-triage",
+    "mode": "report_only",
+    "findings": [],
+    "recommendedNextSteps": ["Review priority buckets", "Approve follow-up tasks manually"],
+    "approvalStatus": "draft_only",
+    "openItemCount": 0,
+    "prioritySummary": {},
+    "blockers": []
+  }
+}

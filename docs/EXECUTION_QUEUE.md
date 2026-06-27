@@ -40,13 +40,16 @@ In v0.1, queue visibility is broader than run eligibility. A call may be visible
 Execution Queue is designed to keep this visible chain intact:
 
 ```text
-Routine / Loop
+Loop Starter Draft (optional)
+-> Saved Routine / Loop
 -> Automation Run
 -> Approval
 -> Tool Gateway Call
 -> Execution Queue
 -> Result or Manual Follow-up
 ```
+
+Loop starter instantiation creates a routine draft only. Execution Queue still begins after a saved routine produces an approved automation run and any Tool Gateway handoff.
 
 Automation approvals can create Tool Gateway calls and surface them into queue without executing them.
 

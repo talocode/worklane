@@ -1,0 +1,18 @@
+{
+  "starterId": "changelog-drafter",
+  "safeDefaultMode": "report_only",
+  "suggestedCadence": "on release branch cut",
+  "requiredApprovals": ["routine_save", "first_run", "release_publish"],
+  "finalReportTemplate": {
+    "summary": "Changelog draft assembled from recent merged work.",
+    "repo": "owner/repo",
+    "starterId": "changelog-drafter",
+    "mode": "report_only",
+    "findings": [],
+    "recommendedNextSteps": ["Edit release notes", "Approve publish steps manually"],
+    "approvalStatus": "draft_only",
+    "releaseVersion": "0.0.0",
+    "sectionSummary": {},
+    "unresolvedChanges": []
+  }
+}

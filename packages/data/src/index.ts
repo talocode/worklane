@@ -28,6 +28,20 @@ export {
 export * as automation from './automation';
 export * as execution from './execution';
 export * as toolGateway from './tool-gateway';
+export * as loopStarters from './loop-starters';
+export {
+  listLoopStarters,
+  getLoopStarter,
+  instantiateLoopStarter,
+  validateAllStarters,
+  LOOP_STARTERS,
+} from './loop-starters';
+export type {
+  WorkLaneLoopStarter,
+  WorkLaneLoopStarterRisk,
+  LoopStarterInstantiateInput,
+  LoopStarterInstantiateResult,
+} from './loop-starters';
 export type {
   Workspace,
   Agent,

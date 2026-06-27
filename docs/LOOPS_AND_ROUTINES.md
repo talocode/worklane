@@ -65,6 +65,17 @@ No secrets, tokens, or raw env values are stored.
 
 In v0.1, schedule and manual are the primary working paths. API, chat, and GitHub placeholder triggers are shape-only foundations.
 
+## Loop Starter Kits
+
+WorkLane Loop Starter Kits v0.1 help builders instantiate safe routine drafts from reusable patterns such as daily triage, CI sweeps, and post-merge cleanup.
+
+- browse starters at `/dashboard/loop-starters`
+- instantiate through `POST /api/loop-starters/:id/instantiate`
+- first run should stay `report_only` until the team validates findings
+- instantiation returns a draft only; saving and scheduling remain separate approval-first steps
+
+See [Loop Starter Kits](LOOP_STARTER_KITS.md) for the full starter catalog and safety model.
+
 ## API Endpoints
 
 - `GET /api/automation/health`
@@ -114,6 +125,13 @@ All responses are JSON-only.
 - `examples/automation/stacklane-health-check.json`
 - `examples/automation/codra-issue-triage.json`
 - `examples/automation/postlane-email-draft.json`
+- `examples/loop-starters/daily-triage.json`
+- `examples/loop-starters/ci-sweeper.json`
+- `examples/loop-starters/pr-babysitter.json`
+- `examples/loop-starters/dependency-sweeper.json`
+- `examples/loop-starters/issue-triage.json`
+- `examples/loop-starters/changelog-drafter.json`
+- `examples/loop-starters/post-merge-cleanup.json`
 
 ## Limitations
 

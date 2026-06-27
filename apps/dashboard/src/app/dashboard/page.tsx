@@ -57,6 +57,7 @@ export default function Dashboard() {
           { label: 'Pending Approvals', value: stats.pendingRuns, href: '/dashboard/runs' },
           { label: 'Tools', value: stats.tools, href: '/dashboard/tool-gateway' },
           { label: 'Automation Runs', value: stats.automationRuns, href: '/dashboard/automation' },
+          { label: 'Loop Starters', value: 7, href: '/dashboard/loop-starters' },
           { label: 'Execution Items', value: stats.executionItems, href: '/dashboard/execution' },
         ].map(s => (
           <a key={s.label} href={s.href} style={{ ...statCard, textDecoration: 'none' }}>

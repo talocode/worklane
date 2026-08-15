@@ -1,0 +1,15 @@
+{
+  "routineId": "flaky-test-diagnosis",
+  "repo": "talocode/worklane",
+  "baseRef": "main",
+  "maxFiles": 20,
+  "maxPatchLines": 300,
+  "maxRuntimeMinutes": 20,
+  "notes": "First run should remain report-only until the evidence is reviewed.",
+  "expectedInitialState": {
+    "status": "pending_approval",
+    "approvalRequired": true,
+    "executionMode": "simulated",
+    "evidenceStatus": "not_collected"
+  }
+}

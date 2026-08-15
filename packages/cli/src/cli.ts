@@ -6,13 +6,20 @@ import { ProviderFactory } from '@talocode/worklane-providers';
 import { createDefaultRegistry } from '@talocode/worklane-agents';
 import { MemoryStore } from '@talocode/worklane-memory';
 import { createDefaultWorkflows } from '@talocode/worklane-workflows';
+import {
+  approveMaintenanceRun,
+  createMaintenanceRun,
+  getMaintenanceReport,
+  isMaintenanceRoutineId,
+  listMaintenanceRoutines,
+} from '@talocode/worklane-data';
 
 const program = new Command();
 
 program
   .name('worklane')
   .description('Open-source AI coworker platform for teams')
-  .version('0.1.1');
+  .version('0.2.0');
 
 program
   .command('init')
@@ -165,6 +172,83 @@ program
       console.log('===============');
       console.log('  worklane memory --status  Show memory status');
       console.log('  worklane memory --list    List memory entries');
+    }
+  });
+
+const maintenance = program
+  .command('maintenance')
+  .description('Prepare and review approval-first repository maintenance runs');
+
+maintenance
+  .command('routines')
+  .description('List built-in maintenance routines')
+  .action(() => {
+    for (const routine of listMaintenanceRoutines()) {
+      console.log(`${routine.id}\t${routine.name}\t${routine.defaultCadence}`);
+    }
+  });
+
+maintenance
+  .command('run')
+  .description('Prepare a maintenance run for approval')
+  .requiredOption('--routine <id>', 'Maintenance routine id')
+  .requiredOption('--repo <owner/repository>', 'Repository')
+  .option('--base-ref <ref>', 'Base reference', 'main')
+  .option('--max-files <count>', 'Maximum files to inspect', (value) => Number.parseInt(value, 10), 20)
+  .option('--max-patch-lines <count>', 'Maximum changed lines', (value) => Number.parseInt(value, 10), 300)
+  .option('--max-runtime-minutes <count>', 'Maximum runtime in minutes', (value) => Number.parseInt(value, 10), 20)
+  .option('--notes <text>', 'Review notes', '')
+  .action((options) => {
+    if (!isMaintenanceRoutineId(options.routine)) {
+      console.error(`Unknown routine: ${options.routine}`);
+      process.exitCode = 1;
+      return;
+    }
+    try {
+      const run = createMaintenanceRun({
+        routineId: options.routine,
+        repo: options.repo,
+        baseRef: options.baseRef,
+        maxFiles: options.maxFiles,
+        maxPatchLines: options.maxPatchLines,
+        maxRuntimeMinutes: options.maxRuntimeMinutes,
+        notes: options.notes,
+      });
+      console.log(JSON.stringify(run, null, 2));
+    } catch (error) {
+      console.error(error instanceof Error ? error.message : 'Failed to create maintenance run.');
+      process.exitCode = 1;
+    }
+  });
+
+maintenance
+  .command('report <run-id>')
+  .description('Print the evidence report for a maintenance run')
+  .action((runId: string) => {
+    const report = getMaintenanceReport(runId);
+    if (!report) {
+      console.error('Maintenance report not found.');
+      process.exitCode = 1;
+      return;
+    }
+    console.log(JSON.stringify(report, null, 2));
+  });
+
+maintenance
+  .command('approve <run-id>')
+  .description('Approve a maintenance run for handoff')
+  .action((runId: string) => {
+    try {
+      const run = approveMaintenanceRun(runId, 'cli-user');
+      if (!run) {
+        console.error('Maintenance run not found.');
+        process.exitCode = 1;
+        return;
+      }
+      console.log(JSON.stringify(run, null, 2));
+    } catch (error) {
+      console.error(error instanceof Error ? error.message : 'Failed to approve maintenance run.');
+      process.exitCode = 1;
     }
   });
 

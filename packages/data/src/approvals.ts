@@ -9,7 +9,6 @@ const VALID_TRANSITIONS: Record<RunStatus, RunStatus[]> = {
   completed: [],
   failed: [],
   cancelled: [],
-  draft: ['pending_approval'],
 };
 
 export function canTransition(from: RunStatus, to: RunStatus): boolean {

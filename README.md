@@ -19,6 +19,7 @@ WorkLane is a local-first command center where teams can create agents, share kn
 - **Loop Starter Kits** — Reusable loop engineering patterns for triage, CI sweeps, PR babysitting, and more
 - **Automation Approvals** — Review pending automation runs before any handoff happens
 - **Execution Queue** — Review approved tool calls, run safe placeholders, or mark manual handoff
+- **WorkLane Maintainer** — Prepare bounded code-maintenance runs with explicit evidence contracts
 - **Approval-First** — Destructive actions require explicit human approval
 - **Audit Logging** — Every agent action recorded and reviewable
 - **Simulated Execution** — Clear labeling when tools aren't connected
@@ -37,6 +38,23 @@ worklane init
 # Run from CLI
 worklane run "summarize this discussion"
 ```
+
+## WorkLane Maintainer
+
+Maintainer prepares bounded repository-maintenance runs with explicit evidence requirements and human approval before handoff.
+
+```bash
+worklane maintenance routines
+
+worklane maintenance run \
+  --routine flaky-test-diagnosis \
+  --repo talocode/worklane \
+  --max-files 20
+```
+
+The initial release supports flaky-test diagnosis, dead-code candidates, and duplicate-implementation detection. Runs start with `executionMode: "simulated"` and `evidenceStatus: "not_collected"`; WorkLane does not claim repository findings until a compatible execution tool is connected.
+
+Self-hosted API routes are available under `/v1/worklane/maintenance/*`. See [WorkLane Maintainer](docs/MAINTAINER.md) for the full route table, limits, evidence contract, and safety model.
 
 ## Dashboard
 
@@ -81,6 +99,7 @@ Local JSON Storage (.worklane/*.json)
 - Loops and routines with local scheduler foundations
 - Loop starter kits with approval-first routine draft instantiation
 - Execution Queue review layer
+- WorkLane Maintainer with flaky-test, dead-code candidate, and duplicate-implementation routines
 - Dashboard UI
 - Local JSON storage
 - Simulated execution
@@ -107,6 +126,7 @@ Local JSON Storage (.worklane/*.json)
 - [Loops & Routines](docs/LOOPS_AND_ROUTINES.md)
 - [Loop Starter Kits](docs/LOOP_STARTER_KITS.md)
 - [Execution Queue](docs/EXECUTION_QUEUE.md)
+- [WorkLane Maintainer](docs/MAINTAINER.md)
 
 ## Contributing
 
@@ -123,6 +143,23 @@ Talocode builds open-source workflow layers for builders: coding agents, learnin
 If WorkLane helps you, you can support the work here:
 
 [![Sponsor Abdulmuiz44](https://img.shields.io/badge/Sponsor-Abdulmuiz44-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/Abdulmuiz44)
+
+## Talocode ecosystem
+
+| Product | Purpose |
+| --- | --- |
+| [WorkLane](https://github.com/talocode/worklane) **(this repo)** | Approval-first team agents and recurring work |
+| [Tera](https://github.com/talocode/tera) | General capability and learning workflows |
+| [StackLane](https://github.com/talocode/stacklane) | Projects, API keys, credits, usage, and billing |
+| [Codra](https://github.com/talocode/codra) | Coding workflows |
+| [ClipLoop](https://github.com/talocode/cliploop) | Video production workflows |
+| [SearchLane](https://github.com/talocode/searchlane) | Search workflows |
+| [VerifyLane](https://github.com/talocode/verifylane) | Verification workflows |
+| [TraceLane](https://github.com/talocode/tracelane) | Agent execution tracing |
+| [PolicyLane](https://github.com/talocode/policylane) | Policy enforcement |
+| [SpendCaps](https://github.com/talocode/spendcaps) | Agent spend controls |
+
+More: [github.com/talocode](https://github.com/talocode) · [talocode.site](https://talocode.site) · [docs.talocode.site](https://docs.talocode.site)
 
 ## License
 

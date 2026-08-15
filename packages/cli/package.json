@@ -22,6 +22,7 @@
     "@talocode/worklane-core": "0.1.0",
     "@talocode/worklane-providers": "0.1.0",
     "@talocode/worklane-memory": "0.1.0",
+    "@talocode/worklane-data": "0.1.0",
     "commander": "^11.0.0"
   },
   "devDependencies": {

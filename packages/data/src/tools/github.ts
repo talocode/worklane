@@ -142,7 +142,7 @@ async function githubRequestWithRetry(
   return { error: lastError || { code: 'unknown', message: 'Max retries exceeded' } };
 }
 
-function validateCreateIssueInput(input: Record<string, unknown>): string | null {
+function validateCreateIssueInput(input: GitHubCreateIssueInput): string | null {
   if (!input.owner || typeof input.owner !== 'string') return 'owner is required and must be a string';
   if (!input.repo || typeof input.repo !== 'string') return 'repo is required and must be a string';
   if (!input.title || typeof input.title !== 'string') return 'title is required and must be a string';
@@ -151,7 +151,7 @@ function validateCreateIssueInput(input: Record<string, unknown>): string | null
   return null;
 }
 
-function validateCreateCommentInput(input: Record<string, unknown>): string | null {
+function validateCreateCommentInput(input: GitHubCreateCommentInput): string | null {
   if (!input.owner || typeof input.owner !== 'string') return 'owner is required and must be a string';
   if (!input.repo || typeof input.repo !== 'string') return 'repo is required and must be a string';
   if (input.issueNumber === undefined || input.issueNumber === null) return 'issueNumber is required';
@@ -248,7 +248,7 @@ function normalizeIssue(raw: any): GitHubIssueSummary {
   };
 }
 
-function validateListIssuesInput(input: Record<string, unknown>): string | null {
+function validateListIssuesInput(input: GitHubListIssuesInput): string | null {
   if (!input.owner || typeof input.owner !== 'string') return 'owner is required and must be a string';
   if (!input.repo || typeof input.repo !== 'string') return 'repo is required and must be a string';
   if (input.state && !['open', 'closed', 'all'].includes(input.state as string)) {
@@ -264,7 +264,7 @@ function validateListIssuesInput(input: Record<string, unknown>): string | null 
   return null;
 }
 
-function validateGetIssueInput(input: Record<string, unknown>): string | null {
+function validateGetIssueInput(input: GitHubGetIssueInput): string | null {
   if (!input.owner || typeof input.owner !== 'string') return 'owner is required and must be a string';
   if (!input.repo || typeof input.repo !== 'string') return 'repo is required and must be a string';
   if (input.issueNumber === undefined || input.issueNumber === null) return 'issueNumber is required';
@@ -372,7 +372,7 @@ export async function getGitHubIssue(
   };
 }
 
-function validateListIssueCommentsInput(input: Record<string, unknown>): string | null {
+function validateListIssueCommentsInput(input: GitHubListIssueCommentsInput): string | null {
   if (!input.owner || typeof input.owner !== 'string') return 'owner is required and must be a string';
   if (!input.repo || typeof input.repo !== 'string') return 'repo is required and must be a string';
   if (input.issueNumber === undefined || input.issueNumber === null) return 'issueNumber is required';
@@ -443,7 +443,7 @@ export async function listGitHubIssueComments(
   };
 }
 
-function validateSearchIssuesInput(input: Record<string, unknown>): string | null {
+function validateSearchIssuesInput(input: GitHubSearchIssuesInput): string | null {
   if (!input.query || typeof input.query !== 'string') return 'query is required and must be a string';
   if (input.query.length > 256) return 'query must be 256 characters or fewer';
   if (input.owner && typeof input.owner !== 'string') return 'owner must be a string';
@@ -543,7 +543,7 @@ export async function searchGitHubIssues(
     return { ok: false, error: 'Unexpected response format from GitHub search API', errorCode: 'unknown' };
   }
 
-  let issues = data.items.map(normalizeSearchIssue);
+  let issues: GitHubSearchIssueSummary[] = data.items.map(normalizeSearchIssue);
 
   if (!input.includePullRequests) {
     issues = issues.filter((i) => !i.isPullRequest);

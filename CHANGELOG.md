@@ -2,6 +2,14 @@
 
 All notable changes to WorkLane will be documented in this file.
 
+## [0.2.0] - 2026-08-15
+
+### Added
+
+- WorkLane Maintainer with three approval-first repository maintenance routines
+- Evidence contracts that remain explicitly empty until connected execution occurs
+- Namespaced maintenance API routes, dashboard controls, CLI commands, limits, tests, and documentation
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 

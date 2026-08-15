@@ -16,6 +16,7 @@ export default function Home() {
         <a href="/dashboard/tool-gateway" style={cardStyle}>Tool Gateway →</a>
         <a href="/dashboard/automation" style={cardStyle}>Loops & Routines →</a>
         <a href="/dashboard/loop-starters" style={cardStyle}>Loop Starter Kits →</a>
+        <a href="/dashboard/maintainer" style={cardStyle}>Maintainer →</a>
         <a href="/dashboard/execution" style={cardStyle}>Execution Queue →</a>
         <a href="/dashboard/audit" style={cardStyle}>Audit Log →</a>
       </div>

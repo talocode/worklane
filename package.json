@@ -1,6 +1,6 @@
 {
   "name": "@talocode/worklane",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Open-source AI coworker platform for teams",
   "main": "dist/worklane.js",
   "bin": {
@@ -9,19 +9,23 @@
   "dependencies": {
     "commander": "^11.1.0"
   },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces",
+    "build": "npm run build --workspaces && node scripts/build-release.mjs",
     "test": "npm run test --workspaces",
     "lint": "npm run lint --workspaces",
     "clean": "npm run clean --workspaces",
     "dev": "npm run dev --workspaces",
     "test:tool-gateway": "npx tsx scripts/test-tool-gateway-v010.mjs",
-    "test:automation": "npx tsx scripts/test-loops-routines-v010.mjs"
-    ,"test:execution":"npx tsx scripts/test-execution-queue-v010.mjs"
+    "test:automation": "npx tsx scripts/test-loops-routines-v010.mjs",
+    "test:execution": "npx tsx scripts/test-execution-queue-v010.mjs",
+    "test:maintainer": "npx tsx scripts/test-maintainer-v020.mjs"
   },
   "keywords": [
     "ai",

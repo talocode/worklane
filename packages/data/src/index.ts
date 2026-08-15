@@ -29,6 +29,7 @@ export * as automation from './automation';
 export * as execution from './execution';
 export * as toolGateway from './tool-gateway';
 export * as loopStarters from './loop-starters';
+export * as maintenance from './maintenance';
 export {
   listLoopStarters,
   getLoopStarter,
@@ -36,12 +37,32 @@ export {
   validateAllStarters,
   LOOP_STARTERS,
 } from './loop-starters';
+export {
+  MAINTENANCE_ROUTINES,
+  listMaintenanceRoutines,
+  getMaintenanceRoutine,
+  isMaintenanceRoutineId,
+  createMaintenanceRun,
+  listMaintenanceRuns,
+  getMaintenanceRun,
+  getMaintenanceReport,
+  approveMaintenanceRun,
+  rejectMaintenanceRun,
+  maintenanceStorage,
+} from './maintenance';
 export type {
   WorkLaneLoopStarter,
   WorkLaneLoopStarterRisk,
   LoopStarterInstantiateInput,
   LoopStarterInstantiateResult,
 } from './loop-starters';
+export type {
+  MaintenanceRoutineId,
+  MaintenanceRoutineDefinition,
+  MaintenanceRunInput,
+  MaintenanceRunRecord,
+  MaintenanceEvidenceReport,
+} from './maintenance';
 export type {
   Workspace,
   Agent,

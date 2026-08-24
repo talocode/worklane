@@ -6,6 +6,7 @@ import { ProviderFactory } from '@talocode/worklane-providers';
 import { createDefaultRegistry } from '@talocode/worklane-agents';
 import { MemoryStore } from '@talocode/worklane-memory';
 import { createDefaultWorkflows } from '@talocode/worklane-workflows';
+import { SocialPublisher, configFromEnv, missingConfig, PLATFORM_ENV_VARS } from '@talocode/worklane-socials';
 import {
   approveMaintenanceRun,
   createMaintenanceRun,
@@ -250,6 +251,63 @@ maintenance
       console.error(error instanceof Error ? error.message : 'Failed to approve maintenance run.');
       process.exitCode = 1;
     }
+  });
+
+
+program
+  .command('socials:status')
+  .description('Show which social platforms are configured')
+  .action(() => {
+    const config = configFromEnv();
+    const all: Array<'facebook' | 'instagram' | 'threads' | 'telegram' | 'x'> = [
+      'facebook', 'instagram', 'threads', 'telegram', 'x',
+    ];
+    for (const platform of all) {
+      const configured = !!config[platform];
+      const hosted = config.hosted?.enabled && config.hosted.apiKey;
+      console.log(`${configured ? '[ready]' : hosted ? '[hosted]' : '[missing]'} ${platform}${configured || hosted ? '' : '  set ' + PLATFORM_ENV_VARS[platform].join(', ')}`);
+    }
+    if (config.hosted) {
+      console.log(`hosted mode: ${config.hosted.enabled ? 'enabled' : 'available'} via ${config.hosted.baseUrl || 'https://api.talocode.site'}`);
+    }
+  });
+
+program
+  .command('socials:post')
+  .description('Publish one post to one or more social platforms')
+  .requiredOption('--text <text>', 'Post text')
+  .option('--platforms <list>', 'Comma-separated: facebook,instagram,threads,telegram,x', 'facebook')
+  .option('--image <url>', 'Public https image URL (required for instagram and threads images)')
+  .option('--video <url>', 'Public https video URL (facebook)')
+  .option('--hosted', 'Force hosted Talocode Cloud routing', false)
+  .action(async (opts) => {
+    const config = configFromEnv();
+    if (opts.hosted && config.hosted) config.hosted.enabled = true;
+    const platforms = String(opts.platforms)
+      .split(',')
+      .map((s: string) => s.trim())
+      .filter(Boolean) as Array<'facebook' | 'instagram' | 'threads' | 'telegram' | 'x'>;
+    const missing = missingConfig(platforms, config);
+    if (missing.length && !(config.hosted?.enabled)) {
+      for (const platform of missing) {
+        console.error(`missing credentials for ${platform}: set ${PLATFORM_ENV_VARS[platform].join(', ')}`);
+      }
+      process.exitCode = 1;
+      return;
+    }
+    const publisher = new SocialPublisher(config);
+    const receipt = await publisher.publish({
+      text: opts.text,
+      platforms,
+      imageUrl: opts.image,
+      videoUrl: opts.video,
+    });
+    for (const result of receipt.results) {
+      const status = result.ok ? 'OK ' : 'FAIL';
+      const ref = result.permalink || result.id || result.error || '';
+      console.log(`${status} ${result.platform}  ${ref}`);
+    }
+    if (receipt.results.some((r) => !r.ok)) process.exitCode = 1;
   });
 
 program.parse();

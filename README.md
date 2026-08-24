@@ -20,6 +20,7 @@ WorkLane is a local-first command center where teams can create agents, share kn
 - **Automation Approvals** — Review pending automation runs before any handoff happens
 - **Execution Queue** — Review approved tool calls, run safe placeholders, or mark manual handoff
 - **WorkLane Maintainer** — Prepare bounded code-maintenance runs with explicit evidence contracts
+- **Socials Publishing** — Post to Facebook, Instagram, Threads, Telegram, and X through one call, with your keys or hosted Talocode Cloud
 - **Approval-First** — Destructive actions require explicit human approval
 - **Audit Logging** — Every agent action recorded and reviewable
 - **Simulated Execution** — Clear labeling when tools aren't connected
@@ -127,6 +128,7 @@ Local JSON Storage (.worklane/*.json)
 - [Loop Starter Kits](docs/LOOP_STARTER_KITS.md)
 - [Execution Queue](docs/EXECUTION_QUEUE.md)
 - [WorkLane Maintainer](docs/MAINTAINER.md)
+- [Socials Publishing](docs/socials.md)
 
 ## Contributing
 
